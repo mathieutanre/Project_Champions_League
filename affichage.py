@@ -1,4 +1,4 @@
-import pandas as pd
+from pandas import *
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -14,3 +14,4 @@ for day in df['Day'].unique():
     plt.xlabel("Team 1")
     plt.ylabel("Team 2")
     plt.show()
+

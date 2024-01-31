@@ -56,6 +56,7 @@ end
 for i in 1:N
     for t in 2:6
         @constraint(model, sum(x[i, j, t] + x[i, j, t+1] for j in 1:N) <= 1 + break_var[i, t])
+        @constraint(model, sum(x[j, i, t] + x[j, i, t+1] for j in 1:N) <= 1 + break_var[i, t])
     end
     @constraint(model, sum(break_var[i, t] for t in 2:6) <= 1)
 end
@@ -115,7 +116,7 @@ end
 add_max_inter_pot_constraint(1, 9, 10, 18, 2, 3) # Pots A et B
 add_max_inter_pot_constraint(1, 9, 19, 27, 2, 3) # Pots A et C
 add_max_inter_pot_constraint(1, 9, 28, 36, 1, 3) # Pots A et D
-add_max_inter_pot_constraint(10, 18, 19, 27, 2, 3) # Pots B et C
+add_max_inter_pot_constraint(10, 18, 19, 27, 1, 3) # Pots B et C
 add_max_inter_pot_constraint(10, 18, 28, 36, 1, 3) # Pots B et D
 add_max_inter_pot_constraint(19, 27, 28, 36, 1, 3) # Pots C et D
 
@@ -180,5 +181,5 @@ for t in 1:T
 end
 
 # Sauvegarder le DataFrame dans un fichier CSV
-CSV.write("match_schedule.csv", df_matches)
+CSV.write("match_schedule_test.csv", df_matches)
 
