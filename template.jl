@@ -13,6 +13,12 @@ T = 8
 # Variables supplémentaires pour contrôler les breaks
 @variable(model, break_var[1:N, 2:6], Bin)
 
+# Variables supplémentaires pour les matchs de chaque pot
+@variable(model, two_matches_potA[1:T], Bin)
+@variable(model, two_matches_potB[1:T], Bin)
+@variable(model, two_matches_potC[1:T], Bin)
+@variable(model, two_matches_potD[1:T], Bin)
+
 # Contrainte : une équipe ne peut pas jouer contre elle-même
 @constraint(model, no_self_play[i in 1:N, t in 1:T], x[i, i, t] == 0)
 
@@ -41,7 +47,23 @@ for i in 1:N
     end
     @constraint(model, sum(break_var[i, t] for t in 2:6) <= 1)
 end
-# Pas de fonction objective nécessaire
+
+# Contraintes pour s'assurer qu'il y a exactement 1 jour avec 2 matchs pour chaque pot
+@constraint(model, sum(two_matches_potA[t] for t in 1:T) == 1)
+@constraint(model, sum(two_matches_potB[t] for t in 1:T) == 1)
+@constraint(model, sum(two_matches_potC[t] for t in 1:T) == 1)
+@constraint(model, sum(two_matches_potD[t] for t in 1:T) == 1)
+
+# Contraintes pour s'assurer que chaque jour a soit 1 soit 2 matchs pour chaque pot
+for t in 1:T
+    @constraint(model, sum(x[i, j, t] for i in 1:9, j in 1:9) == 1 + two_matches_potA[t])
+    @constraint(model, sum(x[i, j, t] for i in 10:18, j in 10:18) == 1 + two_matches_potB[t])
+    @constraint(model, sum(x[i, j, t] for i in 19:27, j in 19:27) == 1 + two_matches_potC[t])
+    @constraint(model, sum(x[i, j, t] for i in 28:36, j in 28:36) == 1 + two_matches_potD[t])
+end
+
+
+
 # Lancement de l'optimisation pour trouver une solution réalisable
 optimize!(model)
 
