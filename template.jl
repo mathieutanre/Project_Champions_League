@@ -113,9 +113,9 @@ end
 
 # Appliquer la contrainte pour chaque paire de pots avec un maximum de 3 matchs par journée
 add_max_inter_pot_constraint(1, 9, 10, 18, 2, 3) # Pots A et B
-add_max_inter_pot_constraint(1, 9, 19, 27, 1, 3) # Pots A et C
+add_max_inter_pot_constraint(1, 9, 19, 27, 2, 3) # Pots A et C
 add_max_inter_pot_constraint(1, 9, 28, 36, 1, 3) # Pots A et D
-add_max_inter_pot_constraint(10, 18, 19, 27, 1, 3) # Pots B et C
+add_max_inter_pot_constraint(10, 18, 19, 27, 2, 3) # Pots B et C
 add_max_inter_pot_constraint(10, 18, 28, 36, 1, 3) # Pots B et D
 add_max_inter_pot_constraint(19, 27, 28, 36, 1, 3) # Pots C et D
 
@@ -123,4 +123,62 @@ add_max_inter_pot_constraint(19, 27, 28, 36, 1, 3) # Pots C et D
 # Lancement de l'optimisation pour trouver une solution réalisable
 optimize!(model)
 
+# Vérifier si une solution a été trouvée
+if termination_status(model) == MOI.OPTIMAL || termination_status(model) == MOI.FEASIBLE
+    println("Une solution a été trouvée.")
+
+    # Créer une structure pour stocker le calendrier des matchs
+    match_schedule = Dict()
+
+    # Parcourir toutes les combinaisons d'équipes et de journées
+    for t in 1:T
+        for i in 1:N
+            for j in 1:N
+                if value(x[i, j, t]) > 0.5 # Si l'équipe i joue contre l'équipe j à la journée t
+                    if !haskey(match_schedule, t)
+                        match_schedule[t] = []
+                    end
+                    push!(match_schedule[t], (i, j))
+                end
+            end
+        end
+    end
+
+    # Afficher le calendrier des matchs
+    for t in 1:T
+        println("Journée $t:")
+        for match in match_schedule[t]
+            println("Équipe $(match[1]) vs Équipe $(match[2])")
+        end
+    end
+else
+    println("Aucune solution trouvée.")
+end
+
+using CSV, DataFrames
+
+# Fonction pour convertir le numéro d'équipe en nom
+function team_name(team_number)
+    if team_number <= 9
+        return "A" * string(team_number)
+    elseif team_number <= 18
+        return "B" * string(team_number - 9)
+    elseif team_number <= 27
+        return "C" * string(team_number - 18)
+    else
+        return "D" * string(team_number - 27)
+    end
+end
+
+# Créer un DataFrame pour stocker les matchs
+df_matches = DataFrame(Day = Int[], Team1 = String[], Team2 = String[])
+
+for t in 1:T
+    for match in match_schedule[t]
+        push!(df_matches, (t, team_name(match[1]), team_name(match[2])))
+    end
+end
+
+# Sauvegarder le DataFrame dans un fichier CSV
+CSV.write("match_schedule.csv", df_matches)
 
