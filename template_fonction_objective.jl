@@ -20,16 +20,21 @@ T = 8
 @variable(model, two_matches_potC[1:T], Bin)
 @variable(model, two_matches_potD[1:T], Bin)
 
-# Variables supplémentaires pour les matchs entre chaque paire de pots
-#=
-@variable(model, three_matches_AB[1:T], Bin)
-@variable(model, three_matches_AC[1:T], Bin)
-@variable(model, three_matches_AD[1:T], Bin)
-@variable(model, three_matches_BC[1:T], Bin)
-@variable(model, three_matches_BD[1:T], Bin)
-@variable(model, three_matches_CD[1:T], Bin)
-=#
+# Variables pour compter les matchs entre les pots pour chaque journée
+@variable(model, matches_AB[1:T] >= 0)
+@variable(model, matches_AC[1:T] >= 0)
+@variable(model, matches_AD[1:T] >= 0)
+@variable(model, matches_BC[1:T] >= 0)
+@variable(model, matches_BD[1:T] >= 0)
+@variable(model, matches_CD[1:T] >= 0)
 
+# Variables pour représenter la déviation du nombre de matchs par rapport à une cible
+@variable(model, deviation_AB[1:T] >= 0)
+@variable(model, deviation_AC[1:T] >= 0)
+@variable(model, deviation_AD[1:T] >= 0)
+@variable(model, deviation_BC[1:T] >= 0)
+@variable(model, deviation_BD[1:T] >= 0)
+@variable(model, deviation_CD[1:T] >= 0)
 
 # Contrainte : une équipe ne peut pas jouer contre elle-même
 @constraint(model, no_self_play[i in 1:N, t in 1:T], x[i, i, t] == 0)
@@ -74,53 +79,39 @@ for t in 1:T
     @constraint(model, sum(x[i, j, t] for i in 28:36, j in 28:36) == 1 + two_matches_potD[t])
 end
 
-# Contraintes pour chaque paire de pots
-#=
-@constraint(model, sum(three_matches_AB[t] for t in 1:T) == 2)
-@constraint(model, sum(three_matches_AC[t] for t in 1:T) == 2)
-@constraint(model, sum(three_matches_AD[t] for t in 1:T) == 2)
-@constraint(model, sum(three_matches_BC[t] for t in 1:T) == 2)
-@constraint(model, sum(three_matches_BD[t] for t in 1:T) == 2)
-@constraint(model, sum(three_matches_CD[t] for t in 1:T) == 2)
 
+average_matches = 18 / T # Nombre moyen de matchs entre deux pots sur les journées
 
-# Fonction pour définir la contrainte de matchs entre deux pots
-
-function add_inter_pot_constraints(pot1_start, pot1_end, pot2_start, pot2_end, three_matches_var)
+# Contraintes pour définir les variables type matches_AB
+function define_matches_pq(pot1_start, pot1_end, pot2_start, pot2_end, matches_pq, deviation_pq)
     for t in 1:T
-        @constraint(model, sum(x[i, j, t] for i in pot1_start:pot1_end, j in pot2_start:pot2_end) + 
-                            sum(x[i, j, t] for i in pot2_start:pot2_end, j in pot1_start:pot1_end) == 2 + three_matches_var[t])
-    end
-end
-
-
-# Appliquer la contrainte pour chaque paire de pots
-add_inter_pot_constraints(1, 9, 10, 18, three_matches_AB)
-add_inter_pot_constraints(1, 9, 19, 27, three_matches_AC)
-add_inter_pot_constraints(1, 9, 28, 36, three_matches_AD)
-add_inter_pot_constraints(10, 18, 19, 27, three_matches_BC)
-add_inter_pot_constraints(10, 18, 28, 36, three_matches_BD)
-add_inter_pot_constraints(19, 27, 28, 36, three_matches_CD)
-=#
-
-# Fonction pour ajouter une contrainte de matchs maximum entre deux pots par journée
-function add_max_inter_pot_constraint(pot1_start, pot1_end, pot2_start, pot2_end, min_matches, max_matches)
-    for t in 1:T
-        @constraint(model, min_matches <= sum(x[i, j, t] for i in pot1_start:pot1_end, j in pot2_start:pot2_end) + 
-                            sum(x[i, j, t] for i in pot2_start:pot2_end, j in pot1_start:pot1_end) <= max_matches)
+        @constraint(model, matches_pq[t] == sum(x[i, j, t] for i in pot1_start:pot1_end, j in pot2_start:pot2_end) + 
+                            sum(x[i, j, t] for i in pot2_start:pot2_end, j in pot1_start:pot1_end))
+        @constraint(model, deviation_pq[t] >= average_matches - matches_pq[t])
     end
 end
 
 # Appliquer la contrainte pour chaque paire de pots avec un maximum de 3 matchs par journée
-add_max_inter_pot_constraint(1, 9, 10, 18, 2, 3) # Pots A et B
-add_max_inter_pot_constraint(1, 9, 19, 27, 1, 3) # Pots A et C
-add_max_inter_pot_constraint(1, 9, 28, 36, 1, 3) # Pots A et D
-add_max_inter_pot_constraint(10, 18, 19, 27, 1, 3) # Pots B et C
-add_max_inter_pot_constraint(10, 18, 28, 36, 1, 3) # Pots B et D
-add_max_inter_pot_constraint(19, 27, 28, 36, 1, 3) # Pots C et D
+define_matches_pq(1, 9, 10, 18, matches_AB, deviation_AB) # Pots A et B
+define_matches_pq(1, 9, 19, 27, matches_AC, deviation_AC) # Pots A et C
+define_matches_pq(1, 9, 28, 36, matches_AD, deviation_AD) # Pots A et D
+define_matches_pq(10, 18, 19, 27, matches_BC, deviation_BC) # Pots B et C
+define_matches_pq(10, 18, 28, 36, matches_BD, deviation_BD) # Pots B et D
+define_matches_pq(19, 27, 28, 36, matches_CD, deviation_CD) # Pots C et D
+
+
+# Fonction objective pour minimiser la variation des matchs entre les pots
+
+@objective(model, Min, 
+    sum(deviation_AB[t] for t in 1:T) +
+    sum(deviation_AC[t] for t in 1:T) +
+    sum(deviation_AD[t] for t in 1:T) +
+    sum(deviation_BC[t] for t in 1:T) +
+    sum(deviation_BD[t] for t in 1:T) +
+    sum(deviation_CD[t] for t in 1:T)
+)
+
 
 
 # Lancement de l'optimisation pour trouver une solution réalisable
 optimize!(model)
-
-
