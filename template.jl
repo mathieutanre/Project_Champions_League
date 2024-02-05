@@ -121,6 +121,8 @@ add_max_inter_pot_constraint(10, 18, 28, 36, 1, 3) # Pots B et D
 add_max_inter_pot_constraint(19, 27, 28, 36, 1, 3) # Pots C et D
 
 
+@objective(model, Min, sum(break_var[i, t] for i in 1:N, t in 2:6))
+
 # Lancement de l'optimisation pour trouver une solution réalisable
 optimize!(model)
 
