@@ -35,7 +35,7 @@ T = 8
 @constraint(model, no_self_play[i in 1:N, t in 1:T], x[i, i, t] == 0)
 
 # Contrainte : une équipe joue au plus 1 fois contre chaque autre équipe
-@constraint(model, max_one_game[i in 1:N, j in 1:N], sum(x[i, j, t] + x[j, i, t] for t in 1:T) <= 1)
+@constraint(model, max_one_game[i in 1:N, j in 1:N; i != j], sum(x[i, j, t] + x[j, i, t] for t in 1:T) <= 1)
 
 # Contrainte : chaque équipe joue exactement un match par journée
 @constraint(model, one_game_per_day[t in 1:T, i in 1:N], sum(x[i, j, t] + x[j, i, t] for j in 1:N) == 1)
@@ -107,41 +107,19 @@ add_inter_pot_constraints(19, 27, 28, 36, three_matches_CD)
 # Fonction pour ajouter une contrainte de matchs maximum entre deux pots par journée
 function add_max_inter_pot_constraint(pot1_start, pot1_end, pot2_start, pot2_end, min_matches, max_matches)
     for t in 1:T
-        @constraint(model, min_matches <= sum(x[i, j, t] + x[j, i, t] for i in pot1_start:pot1_end, j in pot2_start:pot2_end) <= max_matches)
+        @constraint(model, min_matches <= sum(x[i, j, t] for i in pot1_start:pot1_end, j in pot2_start:pot2_end) + 
+                            sum(x[i, j, t] for i in pot2_start:pot2_end, j in pot1_start:pot1_end) <= max_matches)
     end
 end
 
 # Appliquer la contrainte pour chaque paire de pots avec un maximum de 3 matchs par journée
-add_max_inter_pot_constraint(1, 9, 10, 18, 1, 3) # Pots A et B
-add_max_inter_pot_constraint(1, 9, 19, 27, 1, 3) # Pots A et C
+add_max_inter_pot_constraint(1, 9, 10, 18, 2, 3) # Pots A et B
+add_max_inter_pot_constraint(1, 9, 19, 27, 2, 3) # Pots A et C
 add_max_inter_pot_constraint(1, 9, 28, 36, 1, 3) # Pots A et D
 add_max_inter_pot_constraint(10, 18, 19, 27, 1, 3) # Pots B et C
 add_max_inter_pot_constraint(10, 18, 28, 36, 1, 3) # Pots B et D
 add_max_inter_pot_constraint(19, 27, 28, 36, 1, 3) # Pots C et D
 
-
-# Fonction pour ajouter la contrainte d'éviter les matchs consécutifs entre différents pots
-function add_no_consecutive_inter_pot_matches_constraint(pot1_start, pot1_end, pot2_start, pot2_end)
-    for i in pot1_start:pot1_end
-        for t in 1:(T-1)
-            @constraint(model, sum(x[i, j, t] + x[i, j, t+1] + x[j, i, t] + x[j, i, t+1] for j in pot2_start:pot2_end) <= 1)
-        end
-    end
-end
-
-# Appliquer la contrainte pour toutes les combinaisons de pots, y compris les matchs au sein du même pot
-add_no_consecutive_inter_pot_matches_constraint(1, 9, 1, 9)     # Pot A avec Pot A
-add_no_consecutive_inter_pot_matches_constraint(10, 18, 10, 18) # Pot B avec Pot B
-add_no_consecutive_inter_pot_matches_constraint(19, 27, 19, 27) # Pot C avec Pot C
-add_no_consecutive_inter_pot_matches_constraint(28, 36, 28, 36) # Pot D avec Pot D
-#=
-add_no_consecutive_inter_pot_matches_constraint(1, 9, 10, 18)   # Pot A avec Pot B
-add_no_consecutive_inter_pot_matches_constraint(1, 9, 19, 27)   # Pot A avec Pot C
-add_no_consecutive_inter_pot_matches_constraint(1, 9, 28, 36)   # Pot A avec Pot D
-add_no_consecutive_inter_pot_matches_constraint(10, 18, 19, 27) # Pot B avec Pot C
-add_no_consecutive_inter_pot_matches_constraint(10, 18, 28, 36) # Pot B avec Pot D
-add_no_consecutive_inter_pot_matches_constraint(19, 27, 28, 36) # Pot C avec Pot D
-=#
 
 # Lancement de l'optimisation pour trouver une solution réalisable
 optimize!(model)
