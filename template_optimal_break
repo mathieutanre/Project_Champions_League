@@ -10,8 +10,7 @@ T = 8
 # Définition des variables
 @variable(model, x[1:N, 1:N, 1:T], Bin)
 
-# Variables supplémentaires pour contrôler les breaks
-@variable(model, break_var[1:N, 2:6], Bin)
+@variable(model, break_var_1[2:6], Bin)
 
 
 # Variables supplémentaires pour les matchs de chaque pot
@@ -43,13 +42,18 @@ end
 @constraint(model, strict_alternate_end[i in 1:N], sum(x[i, j, 7] + x[i, j, 8] for j in 1:N) == 1)
 
 # Contrainte pour limiter les breaks à 1 maximum
-for i in 1:N
+for i in 2:N
     for t in 2:6
-        @constraint(model, sum(x[i, j, t] + x[i, j, t+1] for j in 1:N) <= 1 + break_var[i, t])
-        @constraint(model, sum(x[j, i, t] + x[j, i, t+1] for j in 1:N) <= 1 + break_var[i, t])
+        @constraint(model, sum(x[i, j, t] + x[i, j, t+1] for j in 1:N) == 1)
+        @constraint(model, sum(x[j, i, t] + x[j, i, t+1] for j in 1:N) == 1)
     end
-    @constraint(model, sum(break_var[i, t] for t in 2:6) <= 1)
 end
+for t in 2:6
+    @constraint(model, sum(x[1, j, t] + x[1, j, t+1] for j in 1:N) <= 1 + break_var_1[t])
+    @constraint(model, sum(x[j, 1, t] + x[j, 1, t+1] for j in 1:N) <= 1 + break_var_1[t])
+end
+
+@constraint(model, sum(break_var_1[t] for t in 2:6) <= 1)
 
 # Contraintes pour s'assurer qu'il y a exactement 1 jour avec 2 matchs pour chaque pot
 @constraint(model, sum(two_matches_potA[t] for t in 1:T) == 1)
@@ -104,9 +108,6 @@ encourage_sequential_matches(model, 10, 18) # Pot B
 encourage_sequential_matches(model, 19, 27) # Pot C
 encourage_sequential_matches(model, 28, 36) # Pot D
 
-@constraint(model, sum(break_var[i, t] for i in 1:N, t in 2:6) == 5)
-
-#@objective(model, Min, sum(break_var[i, t] for i in 1:N, t in 2:6))
 
 # Lancement de l'optimisation pour trouver une solution réalisable
 optimize!(model)
@@ -170,5 +171,4 @@ for t in 1:T
 end
 
 # Sauvegarder le DataFrame dans un fichier CSV
-CSV.write("match_schedule_test.csv", df_matches)
-
+CSV.write("match_schedule_break.csv", df_matches)
