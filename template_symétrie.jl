@@ -13,22 +13,13 @@ T = 8
 # Variables supplémentaires pour contrôler les breaks
 @variable(model, break_var[1:N, 2:6], Bin)
 
-
-# Variables supplémentaires pour les matchs de chaque pot
-@variable(model, two_matches_potA[1:T], Bin)
-@variable(model, two_matches_potB[1:T], Bin)
-@variable(model, two_matches_potC[1:T], Bin)
-@variable(model, two_matches_potD[1:T], Bin)
-
-
+#=
 # Contrainte : une équipe ne peut pas jouer contre elle-même
 @constraint(model, no_self_play[i in 1:N, t in 1:T], x[i, i, t] == 0)
 
 # Contrainte : une équipe joue au plus 1 fois contre chaque autre équipe
 @constraint(model, max_one_game[i in 1:N, j in 1:N; i != j], sum(x[i, j, t] + x[j, i, t] for t in 1:T) <= 1)
 
-# Contrainte : chaque équipe joue exactement un match par journée
-@constraint(model, one_game_per_day[t in 1:T, i in 1:N], sum(x[i, j, t] + x[j, i, t] for j in 1:N) == 1)
 
 # Contraintes spécifiques pour chaque pot
 for i in 1:N
@@ -37,6 +28,147 @@ for i in 1:N
         @constraint(model, sum(x[j, i, t] for t in 1:T, j in pot_start:pot_start+8) == 1)
     end
 end
+=#
+
+
+#Fixer les variables nulles
+
+function fix_sequential_matches(model, pot_start, pot_end)
+    # Pour chaque équipe dans le pot
+    for i in pot_start:pot_end
+        next_team = i+1 <= pot_end ? i+1 : pot_start
+        prev_team = i-1 >= pot_start ? i-1 : pot_end
+        
+        for j in pot_start:pot_end
+            if j != next_team
+                # Imposer que l'équipe i du pot1 ne joue pas contre cette équipe j du pot2
+                for t in 1:T
+                    fix(x[i, j, t], 0; force = true)
+                end
+            end
+            if j != prev_team
+                # Imposer que l'équipe i du pot1 ne joue pas contre cette équipe j du pot2
+                for t in 1:T
+                    fix(x[j, i, t], 0; force = true)
+                end
+            end
+        end
+    end
+end
+
+# Encourager un ordre séquentiel de matchs pour chaque pot
+fix_sequential_matches(model, 1, 9)   # Pot A
+fix_sequential_matches(model, 10, 18) # Pot B
+fix_sequential_matches(model, 19, 27) # Pot C
+fix_sequential_matches(model, 28, 36) # Pot D
+
+
+
+function fix_inter_pot_matches(model, pot1_start, pot1_end, pot2_start, pot2_end)
+    N_pot2 = pot2_end - pot2_start + 1 # Nombre d'équipes dans le pot2
+    # Pour chaque équipe dans le pot1
+    for i in pot1_start:pot1_end
+        # Calcul de l'équipe cible dans le pot2 avec ajustement cyclique
+        target_team_in_pot2 = pot2_start + ((i - pot1_start + 2) % N_pot2)
+    
+        # Parcourir toutes les équipes du pot2 pour imposer les matchs non-cibles à 0
+        for j in pot2_start:pot2_end
+            if j != target_team_in_pot2
+                # Imposer que l'équipe i du pot1 ne joue pas contre cette équipe j du pot2
+                for t in 1:T
+                    fix(x[i, j, t], 0; force = true)
+                end
+            end
+        end
+    end
+end
+
+# Pot A vers Pot B et inversement
+fix_inter_pot_matches(model, 1, 9, 10, 18)
+fix_inter_pot_matches(model, 10, 18, 1, 9)
+
+# Pot A vers Pot C et inversement
+fix_inter_pot_matches(model, 1, 9, 19, 27)
+fix_inter_pot_matches(model, 19, 27, 1, 9)
+
+# Pot A vers Pot D et inversement
+fix_inter_pot_matches(model, 1, 9, 28, 36)
+fix_inter_pot_matches(model, 28, 36, 1, 9)
+
+# Pot B vers Pot C et inversement
+fix_inter_pot_matches(model, 10, 18, 19, 27)
+fix_inter_pot_matches(model, 19, 27, 10, 18)
+
+# Pot B vers Pot D et inversement
+fix_inter_pot_matches(model, 10, 18, 28, 36)
+fix_inter_pot_matches(model, 28, 36, 10, 18)
+
+# Pot C vers Pot D et inversement
+fix_inter_pot_matches(model, 19, 27, 28, 36)
+fix_inter_pot_matches(model, 28, 36, 19, 27)
+
+
+
+
+
+# Contrainte : chaque équipe joue exactement un match par journée
+@constraint(model, one_game_per_day[t in 1:T, i in 1:N], sum(x[i, j, t] + x[j, i, t] for j in 1:N) == 1)
+
+# Ajouter des contraintes pour encourager un ordre séquentiel de matchs au sein de chaque pot
+function encourage_sequential_matches(model, pot_start, pot_end)
+    # Pour chaque équipe dans le pot
+    for i in pot_start:pot_end
+        next_team = i+1 <= pot_end ? i+1 : pot_start
+        prev_team = i-1 >= pot_start ? i-1 : pot_end
+        # Encourage l'équipe i à jouer contre l'équipe suivante et précédente dans le pot
+        @constraint(model, sum(x[i, next_team, t] for t in 1:T) == 1) # Jouer contre l'équipe suivante une fois
+        @constraint(model, sum(x[prev_team, i, t] for t in 1:T) == 1) # Jouer contre l'équipe précédente une fois
+    end
+end
+
+# Encourager un ordre séquentiel de matchs pour chaque pot
+encourage_sequential_matches(model, 1, 9)   # Pot A
+encourage_sequential_matches(model, 10, 18) # Pot B
+encourage_sequential_matches(model, 19, 27) # Pot C
+encourage_sequential_matches(model, 28, 36) # Pot D
+
+
+function encourage_inter_pot_matches(model, pot1_start, pot1_end, pot2_start, pot2_end)
+    N_pot2 = pot2_end - pot2_start + 1 # Nombre d'équipes dans le pot2
+    # Pour chaque équipe dans le pot1
+    for i in pot1_start:pot1_end
+        # Calcul de l'équipe cible dans le pot2 avec ajustement cyclique
+        target_team_in_pot2 = pot2_start + ((i - pot1_start + 2) % N_pot2)
+        
+        # Contrainte pour que l'équipe i du pot1 joue contre l'équipe cible dans le pot2
+        @constraint(model, sum(x[i, target_team_in_pot2, t] for t in 1:T) == 1)
+    end
+end
+
+# Pot A vers Pot B et inversement
+encourage_inter_pot_matches(model, 1, 9, 10, 18)
+encourage_inter_pot_matches(model, 10, 18, 1, 9)
+
+# Pot A vers Pot C et inversement
+encourage_inter_pot_matches(model, 1, 9, 19, 27)
+encourage_inter_pot_matches(model, 19, 27, 1, 9)
+
+# Pot A vers Pot D et inversement
+encourage_inter_pot_matches(model, 1, 9, 28, 36)
+encourage_inter_pot_matches(model, 28, 36, 1, 9)
+
+# Pot B vers Pot C et inversement
+encourage_inter_pot_matches(model, 10, 18, 19, 27)
+encourage_inter_pot_matches(model, 19, 27, 10, 18)
+
+# Pot B vers Pot D et inversement
+encourage_inter_pot_matches(model, 10, 18, 28, 36)
+encourage_inter_pot_matches(model, 28, 36, 10, 18)
+
+# Pot C vers Pot D et inversement
+encourage_inter_pot_matches(model, 19, 27, 28, 36)
+encourage_inter_pot_matches(model, 28, 36, 19, 27)
+
 
 # Contrainte pour l'alternance stricte au début et à la fin
 @constraint(model, strict_alternate_start[i in 1:N], sum(x[i, j, 1] + x[i, j, 2] for j in 1:N) == 1)
@@ -51,6 +183,8 @@ for i in 1:N
     @constraint(model, sum(break_var[i, t] for t in 2:6) <= 1)
 end
 
+
+#=
 # Contraintes pour s'assurer qu'il y a exactement 1 jour avec 2 matchs pour chaque pot
 @constraint(model, sum(two_matches_potA[t] for t in 1:T) == 1)
 @constraint(model, sum(two_matches_potB[t] for t in 1:T) == 1)
@@ -64,6 +198,14 @@ for t in 1:T
     @constraint(model, sum(x[i, j, t] for i in 19:27, j in 19:27) == 1 + two_matches_potC[t])
     @constraint(model, sum(x[i, j, t] for i in 28:36, j in 28:36) == 1 + two_matches_potD[t])
 end
+
+# Contraintes pour chaque paire de pots
+@constraint(model, sum(three_matches_AB[t] for t in 1:T) == 2)
+@constraint(model, sum(three_matches_AC[t] for t in 1:T) == 2)
+@constraint(model, sum(three_matches_AD[t] for t in 1:T) == 2)
+@constraint(model, sum(three_matches_BC[t] for t in 1:T) == 2)
+@constraint(model, sum(three_matches_BD[t] for t in 1:T) == 2)
+@constraint(model, sum(three_matches_CD[t] for t in 1:T) == 2)
 
 
 # Fonction pour ajouter une contrainte de matchs maximum entre deux pots par journée
@@ -105,19 +247,20 @@ encourage_sequential_matches(model, 19, 27) # Pot C
 encourage_sequential_matches(model, 28, 36) # Pot D
 
 
+@constraint(model, sum(break_var[i, t] for i in 1:N, t in 2:6) <= 11)
+
 
 #@objective(model, Min, sum(break_var[i, t] for i in 1:N, t in 2:6))
+
+=#
 
 # Lancement de l'optimisation pour trouver une solution réalisable
 optimize!(model)
 
+
 # Vérifier si une solution a été trouvée
 if termination_status(model) == MOI.OPTIMAL || termination_status(model) == MOI.FEASIBLE
-    println("Une solution a été trouvée.")
-
-    breaks = 0
-    breaks = sum(value(break_var[i, t]) for i in 1:N for t in 2:6 if value(break_var[i, t]) > 0.5)
-    println("Nombre de breaks : $(breaks)")    
+    println("Une solution a été trouvée.")  
 
     # Créer une structure pour stocker le calendrier des matchs
     match_schedule = Dict()
@@ -170,5 +313,4 @@ for t in 1:T
 end
 
 # Sauvegarder le DataFrame dans un fichier CSV
-CSV.write("match_schedule_test.csv", df_matches)
-
+CSV.write("match_schedule_symétrie.csv", df_matches)
