@@ -10,7 +10,7 @@ T = 8
 # Définition des variables
 @variable(model, x[1:N, 1:N, 1:T], Bin)
 
-@variable(model, break_var_1[2:6], Bin)
+@variable(model, break_var[1:4, 2:6], Bin)
 
 
 # Variables supplémentaires pour les matchs de chaque pot
@@ -42,18 +42,29 @@ end
 @constraint(model, strict_alternate_end[i in 1:N], sum(x[i, j, 7] + x[i, j, 8] for j in 1:N) == 1)
 
 # Contrainte pour limiter les breaks à 1 maximum
-for i in 2:N
+for i in [k for k in 2:N if !(k in [10, 19, 28])]
     for t in 2:6
         @constraint(model, sum(x[i, j, t] + x[i, j, t+1] for j in 1:N) == 1)
         @constraint(model, sum(x[j, i, t] + x[j, i, t+1] for j in 1:N) == 1)
     end
 end
+    
 for t in 2:6
-    @constraint(model, sum(x[1, j, t] + x[1, j, t+1] for j in 1:N) <= 1 + break_var_1[t])
-    @constraint(model, sum(x[j, 1, t] + x[j, 1, t+1] for j in 1:N) <= 1 + break_var_1[t])
+    @constraint(model, sum(x[1, j, t] + x[1, j, t+1] for j in 1:N) <= 1 + break_var[1, t])
+    @constraint(model, sum(x[j, 1, t] + x[j, 1, t+1] for j in 1:N) <= 1 + break_var[1, t])
+    @constraint(model, sum(x[10, j, t] + x[10, j, t+1] for j in 1:N) <= 1 + break_var[2, t])
+    @constraint(model, sum(x[j, 10, t] + x[j, 10, t+1] for j in 1:N) <= 1 + break_var[2, t])
+    @constraint(model, sum(x[19, j, t] + x[19, j, t+1] for j in 1:N) <= 1 + break_var[3, t])
+    @constraint(model, sum(x[j, 19, t] + x[j, 19, t+1] for j in 1:N) <= 1 + break_var[3, t])
+    @constraint(model, sum(x[28, j, t] + x[28, j, t+1] for j in 1:N) <= 1 + break_var[4, t])
+    @constraint(model, sum(x[j, 28, t] + x[j, 28, t+1] for j in 1:N) <= 1 + break_var[4, t])
 end
 
-@constraint(model, sum(break_var_1[t] for t in 2:6) <= 1)
+@constraint(model, sum(break_var[1, t] for t in 2:6) <= 1)
+@constraint(model, sum(break_var[2, t] for t in 2:6) <= 1)
+@constraint(model, sum(break_var[3, t] for t in 2:6) <= 1)
+@constraint(model, sum(break_var[4, t] for t in 2:6) <= 1)
+
 
 # Contraintes pour s'assurer qu'il y a exactement 1 jour avec 2 matchs pour chaque pot
 @constraint(model, sum(two_matches_potA[t] for t in 1:T) == 1)
@@ -83,8 +94,8 @@ add_max_inter_pot_constraint(1, 9, 10, 18, 2, 3) # Pots A et B
 add_max_inter_pot_constraint(1, 9, 19, 27, 2, 3) # Pots A et C
 add_max_inter_pot_constraint(1, 9, 28, 36, 1, 3) # Pots A et D
 add_max_inter_pot_constraint(10, 18, 19, 27, 1, 3) # Pots B et C
-add_max_inter_pot_constraint(10, 18, 28, 36, 1, 3) # Pots B et D
-add_max_inter_pot_constraint(19, 27, 28, 36, 1, 3) # Pots C et D
+add_max_inter_pot_constraint(10, 18, 28, 36, 2, 3) # Pots B et D
+add_max_inter_pot_constraint(19, 27, 28, 36, 2, 3) # Pots C et D
 
 
 
@@ -109,6 +120,29 @@ encourage_sequential_matches(model, 19, 27) # Pot C
 encourage_sequential_matches(model, 28, 36) # Pot D
 
 
+# Fonction pour ajouter la contrainte d'éviter les matchs consécutifs entre différents pots
+function add_no_consecutive_inter_pot_matches_constraint(pot1_start, pot1_end, pot2_start, pot2_end)
+    for i in pot1_start:pot1_end
+        for t in 1:(T-1)
+            @constraint(model, sum(x[i, j, t] + x[i, j, t+1] + x[j, i, t] + x[j, i, t+1] for j in pot2_start:pot2_end) <= 1)
+        end
+    end
+end
+
+# Appliquer la contrainte pour toutes les combinaisons de pots, y compris les matchs au sein du même pot
+add_no_consecutive_inter_pot_matches_constraint(1, 9, 1, 9)     # Pot A avec Pot A
+add_no_consecutive_inter_pot_matches_constraint(10, 18, 10, 18) # Pot B avec Pot B
+add_no_consecutive_inter_pot_matches_constraint(19, 27, 19, 27) # Pot C avec Pot C
+add_no_consecutive_inter_pot_matches_constraint(28, 36, 28, 36) # Pot D avec Pot D
+add_no_consecutive_inter_pot_matches_constraint(1, 9, 10, 18)   # Pot A avec Pot B
+add_no_consecutive_inter_pot_matches_constraint(1, 9, 19, 27)   # Pot A avec Pot C
+add_no_consecutive_inter_pot_matches_constraint(1, 9, 28, 36)   # Pot A avec Pot D
+add_no_consecutive_inter_pot_matches_constraint(10, 18, 19, 27) # Pot B avec Pot C
+add_no_consecutive_inter_pot_matches_constraint(10, 18, 28, 36) # Pot B avec Pot D
+add_no_consecutive_inter_pot_matches_constraint(19, 27, 28, 36) # Pot C avec Pot D
+
+
+
 # Lancement de l'optimisation pour trouver une solution réalisable
 optimize!(model)
 
@@ -117,7 +151,7 @@ if termination_status(model) == MOI.OPTIMAL || termination_status(model) == MOI.
     println("Une solution a été trouvée.")
 
     breaks = 0
-    breaks = sum(value(break_var[i, t]) for i in 1:N for t in 2:6 if value(break_var[i, t]) > 0.5)
+    breaks = sum(value(break_var[i, t]) for i in 1:4 for t in 2:6 if value(break_var[i, t]) > 0.5)
     println("Nombre de breaks : $(breaks)")    
 
     # Créer une structure pour stocker le calendrier des matchs
