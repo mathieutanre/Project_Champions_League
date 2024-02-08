@@ -11,7 +11,7 @@ T = 8
 @variable(model, x[1:N, 1:N, 1:T], Bin)
 
 # Variables supplémentaires pour contrôler les breaks
-@variable(model, break_var[1:N, 2:6], Bin)
+@variable(model, break_var[1:8, 2:6], Bin)
 
 #=
 # Contrainte : une équipe ne peut pas jouer contre elle-même
@@ -169,21 +169,44 @@ encourage_inter_pot_matches(model, 28, 36, 10, 18)
 encourage_inter_pot_matches(model, 19, 27, 28, 36)
 encourage_inter_pot_matches(model, 28, 36, 19, 27)
 
-
+#=
 # Contrainte pour l'alternance stricte au début et à la fin
 @constraint(model, strict_alternate_start[i in 1:N], sum(x[i, j, 1] + x[i, j, 2] for j in 1:N) == 1)
 @constraint(model, strict_alternate_end[i in 1:N], sum(x[i, j, 7] + x[i, j, 8] for j in 1:N) == 1)
 
-# Contrainte pour limiter les breaks à 1 maximum
-for i in 1:N
+# Équipes sans break
+for i in [k for k in 3:N if !(k in [10, 11, 19, 20, 28, 29])]
     for t in 2:6
-        @constraint(model, sum(x[i, j, t] + x[i, j, t+1] for j in 1:N) <= 1 + break_var[i, t])
-        @constraint(model, sum(x[j, i, t] + x[j, i, t+1] for j in 1:N) <= 1 + break_var[i, t])
+        @constraint(model, sum(x[i, j, t] + x[i, j, t+1] for j in 1:N) == 1)
+        @constraint(model, sum(x[j, i, t] + x[j, i, t+1] for j in 1:N) == 1)
     end
-    @constraint(model, sum(break_var[i, t] for t in 2:6) <= 1)
+end
+    
+# Contraintes pour limiter les breaks à 1 maximum pour A1, B1, C1 et D1
+
+for t in 2:6
+    @constraint(model, sum(x[1, j, t] + x[1, j, t+1] for j in 1:N) <= 1 + break_var[1, t])
+    @constraint(model, sum(x[j, 1, t] + x[j, 1, t+1] for j in 1:N) <= 1 + break_var[1, t])
+    @constraint(model, sum(x[10, j, t] + x[10, j, t+1] for j in 1:N) <= 1 + break_var[2, t])
+    @constraint(model, sum(x[j, 10, t] + x[j, 10, t+1] for j in 1:N) <= 1 + break_var[2, t])
+    @constraint(model, sum(x[19, j, t] + x[19, j, t+1] for j in 1:N) <= 1 + break_var[3, t])
+    @constraint(model, sum(x[j, 19, t] + x[j, 19, t+1] for j in 1:N) <= 1 + break_var[3, t])
+    @constraint(model, sum(x[28, j, t] + x[28, j, t+1] for j in 1:N) <= 1 + break_var[4, t])
+    @constraint(model, sum(x[j, 28, t] + x[j, 28, t+1] for j in 1:N) <= 1 + break_var[4, t])
+    @constraint(model, sum(x[2, j, t] + x[2, j, t+1] for j in 1:N) <= 1 + break_var[5, t])
+    @constraint(model, sum(x[j, 2, t] + x[j, 2, t+1] for j in 1:N) <= 1 + break_var[5, t])
+    @constraint(model, sum(x[11, j, t] + x[11, j, t+1] for j in 1:N) <= 1 + break_var[6, t])
+    @constraint(model, sum(x[j, 11, t] + x[j, 11, t+1] for j in 1:N) <= 1 + break_var[6, t])
+    @constraint(model, sum(x[20, j, t] + x[20, j, t+1] for j in 1:N) <= 1 + break_var[7, t])
+    @constraint(model, sum(x[j, 20, t] + x[j, 20, t+1] for j in 1:N) <= 1 + break_var[7, t])
+    @constraint(model, sum(x[29, j, t] + x[29, j, t+1] for j in 1:N) <= 1 + break_var[8, t])
+    @constraint(model, sum(x[j, 29, t] + x[j, 29, t+1] for j in 1:N) <= 1 + break_var[8, t])
 end
 
-
+for i in 1:8
+@constraint(model, sum(break_var[i, t] for t in 2:6) <= 1)
+end
+=#
 #=
 # Contraintes pour s'assurer qu'il y a exactement 1 jour avec 2 matchs pour chaque pot
 @constraint(model, sum(two_matches_potA[t] for t in 1:T) == 1)
