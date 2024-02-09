@@ -113,31 +113,6 @@ encourage_sequential_matches(model, 10, 18) # Pot B
 encourage_sequential_matches(model, 19, 27) # Pot C
 encourage_sequential_matches(model, 28, 36) # Pot D
 
-#=
-# Définition des plages pour les pots
-pot_ranges = Dict(
-    "A" => 1:9,
-    "B" => 10:18,
-    "C" => 19:27,
-    "D" => 28:36
-)
-
-# Ajouter les contraintes pour les 4 premières et les 4 dernières journées
-for pot_name in keys(pot_ranges)
-    pot_start, pot_end = pot_ranges[pot_name]
-    
-    # Pour chaque équipe dans chaque pot
-    for i in 1:N
-        # Assurer que l'équipe i joue contre une équipe du pot spécifié pendant les 4 premières journées
-        @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in pot_start:pot_end, t in 1:4) == 1)
-        
-        # Et pendant les 4 dernières journées
-        @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in pot_start:pot_end, t in 5:8) == 1)
-    end
-end
-=#
-
-
 
 # Fonction pour ajouter la contrainte d'éviter les matchs consécutifs entre différents pots
 function add_no_consecutive_inter_pot_matches_constraint_3(pot_start, pot_end)
@@ -150,7 +125,7 @@ end
 
 function add_no_consecutive_inter_pot_matches_constraint_2(pot_start, pot_end)
     for i in 1:N
-        for t in 1:(T-2)
+        for t in 1:(T-1)
             @constraint(model, sum(x[i, j, t] + x[i, j, t+1] + x[j, i, t] + x[j, i, t+1] for j in pot_start:pot_end) <= 1)
         end
     end
@@ -160,7 +135,16 @@ end
 add_no_consecutive_inter_pot_matches_constraint_3(1, 9)   # avec Pot A
 add_no_consecutive_inter_pot_matches_constraint_3(10, 18) # avec Pot B
 
-add_no_consecutive_inter_pot_matches_constraint_2(28, 36) # avec Pot D
+
+for i in 1:N
+    # Assurer que l'équipe i joue contre une équipe du pot spécifié pendant les 4 premières journées
+    @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 28:36, t in 7:8) <= 1)
+    @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 28:36, t in 1:2) <= 1)
+    @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 19:27, t in 7:8) <= 1)
+    @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 19:27, t in 1:2) <= 1)
+end
+
+#add_no_consecutive_inter_pot_matches_constraint_2(28, 36) # avec Pot D
 
 #=
 add_no_consecutive_inter_pot_matches_constraint(19, 27) # avec Pot C
@@ -261,3 +245,35 @@ end
 
 # Sauvegarder le DataFrame dans un fichier CSV
 CSV.write("match_schedule_break.csv", df_matches)
+
+using DataFrames
+using CSV
+
+# Supposons que vous avez une fonction qui retourne le nom de l'équipe basé sur un identifiant
+# Par exemple : team_name(1) retourne "A1", team_name(10) retourne "B1", etc.
+
+# Initialisation des DataFrames pour chaque équipe
+team_schedules = Dict{String, DataFrame}()
+
+for team_id in 1:N
+    team_schedules[team_name(team_id)] = DataFrame(Day = Int[], Opponent = String[], HomeAway = String[])
+end
+
+# Remplir les DataFrames avec les matchs pour chaque équipe
+for t in 1:T
+    for i in 1:N
+        for j in 1:N
+            if value(x[i, j, t]) > 0.5  # ou juste 'value(x[i, j, t]) == 1' si les résultats sont définitifs
+                # i joue à domicile contre j
+                push!(team_schedules[team_name(i)], (Day = t, Opponent = team_name(j), HomeAway = "Home"))
+                # j joue à l'extérieur contre i
+                push!(team_schedules[team_name(j)], (Day = t, Opponent = team_name(i), HomeAway = "Away"))
+            end
+        end
+    end
+end
+
+
+# Si vous préférez un seul fichier CSV pour toutes les équipes, vous pouvez faire comme suit:
+all_teams_schedule = vcat(team_schedules...)
+CSV.write("all_teams_schedule.csv", all_teams_schedule)
