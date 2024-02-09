@@ -11,7 +11,7 @@ T = 8
 @variable(model, x[1:N, 1:N, 1:T], Bin)
 
 # Variables supplémentaires pour contrôler les breaks
-@variable(model, break_var[1:8, 2:6], Bin)
+@variable(model, break_var[1:N, 2:6], Bin)
 
 #=
 # Contrainte : une équipe ne peut pas jouer contre elle-même
@@ -69,7 +69,7 @@ function fix_inter_pot_matches(model, pot1_start, pot1_end, pot2_start, pot2_end
     # Pour chaque équipe dans le pot1
     for i in pot1_start:pot1_end
         # Calcul de l'équipe cible dans le pot2 avec ajustement cyclique
-        target_team_in_pot2 = pot2_start + ((i - pot1_start + 2) % N_pot2)
+        target_team_in_pot2 = pot2_start + ((i - pot1_start + 1) % N_pot2)
     
         # Parcourir toutes les équipes du pot2 pour imposer les matchs non-cibles à 0
         for j in pot2_start:pot2_end
@@ -138,7 +138,7 @@ function encourage_inter_pot_matches(model, pot1_start, pot1_end, pot2_start, po
     # Pour chaque équipe dans le pot1
     for i in pot1_start:pot1_end
         # Calcul de l'équipe cible dans le pot2 avec ajustement cyclique
-        target_team_in_pot2 = pot2_start + ((i - pot1_start + 2) % N_pot2)
+        target_team_in_pot2 = pot2_start + ((i - pot1_start + 1) % N_pot2)
         
         # Contrainte pour que l'équipe i du pot1 joue contre l'équipe cible dans le pot2
         @constraint(model, sum(x[i, target_team_in_pot2, t] for t in 1:T) == 1)
@@ -169,11 +169,21 @@ encourage_inter_pot_matches(model, 28, 36, 10, 18)
 encourage_inter_pot_matches(model, 19, 27, 28, 36)
 encourage_inter_pot_matches(model, 28, 36, 19, 27)
 
-#=
+
 # Contrainte pour l'alternance stricte au début et à la fin
 @constraint(model, strict_alternate_start[i in 1:N], sum(x[i, j, 1] + x[i, j, 2] for j in 1:N) == 1)
 @constraint(model, strict_alternate_end[i in 1:N], sum(x[i, j, 7] + x[i, j, 8] for j in 1:N) == 1)
 
+# Contrainte pour limiter les breaks à 1 maximum
+for i in 1:N
+    for t in 2:6
+        @constraint(model, sum(x[i, j, t] + x[i, j, t+1] for j in 1:N) <= 1 + break_var[i, t])
+        @constraint(model, sum(x[j, i, t] + x[j, i, t+1] for j in 1:N) <= 1 + break_var[i, t])
+    end
+    @constraint(model, sum(break_var[i, t] for t in 2:6) <= 1)
+end
+
+#=
 # Équipes sans break
 for i in [k for k in 3:N if !(k in [10, 11, 19, 20, 28, 29])]
     for t in 2:6
