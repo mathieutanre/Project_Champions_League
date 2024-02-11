@@ -41,7 +41,7 @@ end
 @constraint(model, strict_alternate_start[i in 1:N], sum(x[i, j, 1] + x[i, j, 2] for j in 1:N) == 1)
 @constraint(model, strict_alternate_end[i in 1:N], sum(x[i, j, 7] + x[i, j, 8] for j in 1:N) == 1)
 
-# Contrainte pour l'alternance parfaite home/away
+# Contrainte pour l'alternance parfaite home/away sauf pour A1, B1, C1 et D1 
 for i in [k for k in 1:N if !(k in [1, 10, 19, 28])]
     for t in 2:6
         @constraint(model, sum(x[i, j, t] + x[i, j, t+1] for j in 1:N) == 1)
@@ -181,6 +181,16 @@ add_no_consecutive_inter_pot_matches_constraint(19, 27, 10, 18) # Pot C avec Pot
 add_no_consecutive_inter_pot_matches_constraint(28, 36, 10, 18) # Pot D avec Pot B
 add_no_consecutive_inter_pot_matches_constraint(28, 36, 19, 27) # Pot D avec Pot C
 =#
+
+
+
+
+# ------------------------------------------------SOLVEUR------------------------------------------------------------------------------
+
+
+
+
+
 
 # Lancement de l'optimisation pour trouver une solution réalisable
 optimize!(model)

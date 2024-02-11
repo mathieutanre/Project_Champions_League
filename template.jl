@@ -20,7 +20,7 @@ T = 8
 @variable(model, two_matches_potC[1:T], Bin)
 @variable(model, two_matches_potD[1:T], Bin)
 
-# Variables supplémentaires pour les matchs entre les pots A et B et d'autre part C et d
+# Variables supplémentaires pour les matchs entre les pots A et B et d'autre part C et D
 @variable(model, three_matches_potsAB[1:T], Bin)
 @variable(model, three_matches_potsCD[1:T], Bin)
 
@@ -48,7 +48,31 @@ for i in 1:N
     @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 1:18 for t in 1:4) == 2)
 end
 
-#On joue une fois contre 1 equipe du pot A dans la première moitié = IMPOSSIBLE
+
+
+
+
+
+#On peut attribuer une difficulté aux matchs contre A = 12 contre B = 10 contre C = 8 contre D=6
+#Difficulté totale = 2*(12+10+8+6) = 72 car on joue deux fois contre toutes les catégories
+# 3*72 / 8 = 27
+# on peut essayer de demander une difficulté comprise entre 26 et 28 pour toute période de trois matchs comme res entier entre 7 et 8
+# A verifier: est ce que cela évite les effets de carry over -> on ne peut pas avoir deux fois A dans un laps de temps de 3 jours ok
+
+#for i in 1:N
+#    for t in 1:(T-2)
+#        @constraint(model, 26 <= 
+#            12 * sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2] for j in 1:9) + 
+#            10 * sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2] for j in 10:18) + 
+#            8 * sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2] for j in 19:27) + 
+#            6 * sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2] for j in 28:N) <= 28)
+#    end
+#end
+
+
+
+
+#jouer exactement une fois contre 1 equipe du pot A dans la première moitié = IMPOSSIBLE
 #for i in 1:N
 #    @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 1:9 for t in 1:4) == 1)
 #    @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 28:36 for t in 1:4) == 1)
@@ -69,13 +93,21 @@ for i in 1:N
     @constraint(model, sum(break_var[i, t] for t in 2:6) <= 1)
 end
 
-# Contraintes pour s'assurer qu'il y a exactement 1 jour avec 2 matchs pour chaque pot
+
+#Contrainte sur le nombre de break, on cherche une solution a 4 break, une chaque pour groupe
+@constraint(model, sum(break_var[i, t] for i in 1:9, t in 2:6) <= 1)
+@constraint(model, sum(break_var[i, t] for i in 10:18, t in 2:6) <= 1)
+@constraint(model, sum(break_var[i, t] for i in 19:27, t in 2:6) <= 1)
+@constraint(model, sum(break_var[i, t] for i in 28:36, t in 2:6) <= 1)
+
+
+# Contraintes pour s'assurer qu'il y ait exactement 1 jour avec 2 matchs intra pot pour chaque pot
 @constraint(model, sum(two_matches_potA[t] for t in 1:T) == 1)
 @constraint(model, sum(two_matches_potB[t] for t in 1:T) == 1)
 @constraint(model, sum(two_matches_potC[t] for t in 1:T) == 1)
 @constraint(model, sum(two_matches_potD[t] for t in 1:T) == 1)
 
-# Contraintes pour s'assurer que chaque jour a soit 1 soit 2 matchs pour chaque pot
+# Contraintes pour s'assurer que chaque jour on ait ou bien 1 ou bien 2 matchs pour chaque pot
 for t in 1:T
     @constraint(model, sum(x[i, j, t] for i in 1:9, j in 1:9) == 1 + two_matches_potA[t])
     @constraint(model, sum(x[i, j, t] for i in 10:18, j in 10:18) == 1 + two_matches_potB[t])
@@ -84,8 +116,7 @@ for t in 1:T
 end
 
 
-
-# Contraintes pour s'assurer qu'il y a exactement 2 jour avec 3 matchs inter-pots pour les couples (A,B) et (C,D)
+# Contraintes pour s'assurer qu'il y a exactement 2 jours avec 3 matchs inter-pots pour les couples (A,B) et (C,D)
 @constraint(model, sum(three_matches_potsAB[t] for t in 1:T) == 2)
 @constraint(model, sum(three_matches_potsCD[t] for t in 1:T) == 2)
 
@@ -107,22 +138,23 @@ end
 
 # Appliquer la contrainte pour chaque paire de pots avec un maximum de 3 matchs par journée, (non obligatoire
 #                                                                                              pour les pots A et B et C et D)
-add_max_inter_pot_constraint(1, 9, 10, 18, 2, 3) # Pots A et B 
+#add_max_inter_pot_constraint(1, 9, 10, 18, 2, 3) # Pots A et B 
 add_max_inter_pot_constraint(1, 9, 19, 27, 2, 3) # Pots A et C
 add_max_inter_pot_constraint(1, 9, 28, 36, 1, 3) # Pots A et D
 add_max_inter_pot_constraint(10, 18, 19, 27, 1, 3) # Pots B et C
 add_max_inter_pot_constraint(10, 18, 28, 36, 1, 3) # Pots B et D
-add_max_inter_pot_constraint(19, 27, 28, 36, 1, 3) # Pots C et D
+#add_max_inter_pot_constraint(19, 27, 28, 36, 1, 3) # Pots C et D
 
 
 
-# Ajouter des contraintes pour encourager un ordre séquentiel de matchs au sein de chaque pot
+# Ajouter des contraintes pour imposer un ordre séquentiel de matchs au sein de chaque pot
+# Par exemple A1 joue contre A2 qui joue contre A3 etc
 function encourage_sequential_matches(model, pot_start, pot_end)
     # Pour chaque équipe dans le pot
     for i in pot_start:pot_end
         next_team = i+1 <= pot_end ? i+1 : pot_start
         prev_team = i-1 >= pot_start ? i-1 : pot_end
-        # Encourage l'équipe i à jouer contre l'équipe suivante et précédente dans le pot
+        # On impose à l'équipe i de jouer contre l'équipe suivante et précédente dans le pot
         for t in 1:T
             @constraint(model, sum(x[i, next_team, t] for t in 1:T) == 1) # Jouer contre l'équipe suivante une fois
             @constraint(model, sum(x[prev_team, i, t] for t in 1:T) == 1) # Jouer contre l'équipe précédente une fois
@@ -136,13 +168,55 @@ encourage_sequential_matches(model, 10, 18) # Pot B
 encourage_sequential_matches(model, 19, 27) # Pot C
 encourage_sequential_matches(model, 28, 36) # Pot D
 
-#Contrainte sur le nombre de break, on cherche une solution a 4 break, une chaque pour groupe
-@constraint(model, sum(break_var[i, t] for i in 1:9, t in 2:6) == 1)
-@constraint(model, sum(break_var[i, t] for i in 10:18, t in 2:6) == 1)
-@constraint(model, sum(break_var[i, t] for i in 19:27, t in 2:6) == 1)
-@constraint(model, sum(break_var[i, t] for i in 28:36, t in 2:6) == 1)
+
+
+
+
+
+# Fonction pour ajouter la contrainte d'éviter les matchs consécutifs entre différents pots 
+#distance de 3 matchs entre deux matchs contre un le pot A et D
+function add_no_consecutive_inter_pot_matches_constraint_3(pot_start, pot_end)
+    for i in 1:N
+        for t in 1:(T-2)
+            @constraint(model, sum(x[i, j, t] + x[i, j, t+1] + x[i, j, t+2] + x[j, i, t] + x[j, i, t+1] + x[j, i, t+2] for j in pot_start:pot_end) <= 1)
+        end
+    end
+end
+#distance de 2 maatchs entre deux matchs contre les pots B et D
+function add_no_consecutive_inter_pot_matches_constraint_2(pot_start, pot_end)
+    for i in 1:N
+        for t in 1:(T-1)
+            @constraint(model, sum(x[i, j, t] + x[i, j, t+1] + x[j, i, t] + x[j, i, t+1] for j in pot_start:pot_end) <= 1)
+        end
+    end
+end
+
+# Appliquer la contrainte pour tous les pots
+add_no_consecutive_inter_pot_matches_constraint_3(1, 9)   # avec Pot A
+#add_no_consecutive_inter_pot_matches_constraint_2(28, 36) # avec Pot D
+#add_no_consecutive_inter_pot_matches_constraint_2(10, 18) # avec Pot B
+#add_no_consecutive_inter_pot_matches_constraint_3(19, 27) # avec pot C
+
+
+#for i in 1:N
+     #Assurer que l'équipe i joue contre une équipe du pot spécifié pendant les 4 premières journées = 
+     #on empeche AA ou DD au début et à la fin
+    #@constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 28:36, t in 7:8) <= 1)
+    #@constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 28:36, t in 1:2) <= 1)
+    #@constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 19:27, t in 7:8) <= 1)
+    #@constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 19:27, t in 1:2) <= 1)
+#end
 
 #@objective(model, Min, sum(break_var[i, t] for i in 1:N, t in 2:6))
+
+
+
+
+#--------------------------------------------SOLVEUR------------------------------------------------------------------------------------
+
+
+
+
 
 # Lancement de l'optimisation pour trouver une solution réalisable
 optimize!(model)
