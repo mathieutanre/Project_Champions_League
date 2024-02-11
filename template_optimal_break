@@ -123,67 +123,26 @@ function add_no_consecutive_inter_pot_matches_constraint_3(pot_start, pot_end)
     end
 end
 
-function add_no_consecutive_inter_pot_matches_constraint_2(pot_start, pot_end)
-    for i in 1:N
-        for t in 1:(T-1)
-            @constraint(model, sum(x[i, j, t] + x[i, j, t+1] + x[j, i, t] + x[j, i, t+1] for j in pot_start:pot_end) <= 1)
-        end
-    end
-end
-
-# Appliquer la contrainte pour tous les pots
 add_no_consecutive_inter_pot_matches_constraint_3(1, 9)   # avec Pot A
 add_no_consecutive_inter_pot_matches_constraint_3(10, 18) # avec Pot B
 
-
+#=
 for i in 1:N
-    # Assurer que l'équipe i joue contre une équipe du pot spécifié pendant les 4 premières journées
     @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 28:36, t in 7:8) <= 1)
     @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 28:36, t in 1:2) <= 1)
-    @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 19:27, t in 7:8) <= 1)
-    @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 19:27, t in 1:2) <= 1)
+    #@constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 19:27, t in 7:8) <= 1)
+    #@constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 19:27, t in 1:2) <= 1)
 end
-
-#add_no_consecutive_inter_pot_matches_constraint_2(28, 36) # avec Pot D
-
-#=
-add_no_consecutive_inter_pot_matches_constraint(19, 27) # avec Pot C
-add_no_consecutive_inter_pot_matches_constraint(28, 36) # avec Pot D
 =#
 
-#=
-function add_no_consecutive_inter_pot_matches_constraint(pot1_start, pot1_end, pot2_start, pot2_end)
-    for i in pot1_start:pot1_end
-        for t in 1:(T-1)
-            @constraint(model, sum(x[i, j, t] + x[i, j, t+1] + x[j, i, t] + x[j, i, t+1] for j in pot2_start:pot2_end) <= 1)
-        end
-    end
+for i in 1:N
+    @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 1:18, t in 6:8) >= 1)
+    @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 1:18, t in 1:3) >= 1)
 end
-
-# Appliquer la contrainte pour toutes les combinaisons de pots, y compris les matchs au sein du même pot
-add_no_consecutive_inter_pot_matches_constraint(1, 9, 1, 9)     # Pot A avec Pot A
-add_no_consecutive_inter_pot_matches_constraint(10, 18, 10, 18) # Pot B avec Pot B
-add_no_consecutive_inter_pot_matches_constraint(19, 27, 19, 27) # Pot C avec Pot C
-add_no_consecutive_inter_pot_matches_constraint(28, 36, 28, 36) # Pot D avec Pot D
-add_no_consecutive_inter_pot_matches_constraint(1, 9, 10, 18)   # Pot A avec Pot B
-add_no_consecutive_inter_pot_matches_constraint(1, 9, 19, 27)   # Pot A avec Pot C
-add_no_consecutive_inter_pot_matches_constraint(1, 9, 28, 36)   # Pot A avec Pot D
-add_no_consecutive_inter_pot_matches_constraint(10, 18, 19, 27) # Pot B avec Pot C
-add_no_consecutive_inter_pot_matches_constraint(10, 18, 28, 36) # Pot B avec Pot D
-add_no_consecutive_inter_pot_matches_constraint(19, 27, 28, 36) # Pot C avec Pot D
-=#
-
-#=
-add_no_consecutive_inter_pot_matches_constraint(10, 18, 1, 9)   # Pot B avec Pot A
-add_no_consecutive_inter_pot_matches_constraint(19, 27, 1, 9)   # Pot C avec Pot A
-add_no_consecutive_inter_pot_matches_constraint(28, 36, 1, 9)   # Pot D avec Pot A
-add_no_consecutive_inter_pot_matches_constraint(19, 27, 10, 18) # Pot C avec Pot B
-add_no_consecutive_inter_pot_matches_constraint(28, 36, 10, 18) # Pot D avec Pot B
-add_no_consecutive_inter_pot_matches_constraint(28, 36, 19, 27) # Pot D avec Pot C
-=#
 
 # Lancement de l'optimisation pour trouver une solution réalisable
 optimize!(model)
+
 
 # Vérifier si une solution a été trouvée
 if termination_status(model) == MOI.OPTIMAL || termination_status(model) == MOI.FEASIBLE
@@ -246,11 +205,6 @@ end
 # Sauvegarder le DataFrame dans un fichier CSV
 CSV.write("match_schedule_break.csv", df_matches)
 
-using DataFrames
-using CSV
-
-# Supposons que vous avez une fonction qui retourne le nom de l'équipe basé sur un identifiant
-# Par exemple : team_name(1) retourne "A1", team_name(10) retourne "B1", etc.
 
 # Initialisation des DataFrames pour chaque équipe
 team_schedules = Dict{String, DataFrame}()

@@ -13,13 +13,6 @@ T = 8
 @variable(model, break_var[1:11, 2:6], Bin)
 
 
-# Variables supplémentaires pour les matchs de chaque pot
-@variable(model, two_matches_potA[1:T], Bin)
-@variable(model, two_matches_potB[1:T], Bin)
-@variable(model, two_matches_potC[1:T], Bin)
-@variable(model, two_matches_potD[1:T], Bin)
-
-
 # Contrainte : une équipe ne peut pas jouer contre elle-même
 @constraint(model, no_self_play[i in 1:N, t in 1:T], x[i, i, t] == 0)
 
