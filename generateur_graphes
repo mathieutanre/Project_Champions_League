@@ -1,0 +1,51 @@
+using JuMP
+using Gurobi
+using LightGraphs
+
+function is_8_coloriable(G)
+    n_edges = LightGraphs.ne(G)
+    edges = collect(LightGraphs.edges(G))
+    n_vertices = LightGraphs.nv(G)
+    
+    # Pour un graphe 8-régulier, testons directement avec 8 couleurs
+    max_colors = 8
+    
+    model = Model(Gurobi.Optimizer)
+    set_optimizer_attribute(model, "OutputFlag", 0)
+    
+    @variable(model, x[1:n_edges, 1:max_colors], Bin)
+    
+    # Chaque arête reçoit au moins une couleur
+    @constraint(model, [e in 1:n_edges], sum(x[e, :]) == 1)
+    
+    # Deux arêtes incidentes ne peuvent pas partager la même couleur
+    for v in 1:n_vertices
+        adj_edges = [i for (i, e) in enumerate(edges) if v in e.src || v in e.dst]
+        for c in 1:max_colors
+            @constraint(model, sum(x[e, c] for e in adj_edges) <= 1)
+        end
+    end
+    
+    optimize!(model)
+    
+    return termination_status(model) == MOI.OPTIMAL
+end
+
+
+
+function estimate_chromatic_index_proportion(num_graphs)
+    count_8_chromatic_index = 0
+    for _ in 1:num_graphs
+        G = LightGraphs.random_regular_graph(36, 8)
+        if is_8_coloriable(G)
+            count_8_chromatic_index += 1
+        end
+    end
+    return count_8_chromatic_index / num_graphs
+end
+
+
+# Exemple d'utilisation :
+num_graphs = 10000  
+proportion = estimate_chromatic_index_proportion(num_graphs)
+println("Proportion de graphes avec un indice chromatique de 8 : $proportion")
