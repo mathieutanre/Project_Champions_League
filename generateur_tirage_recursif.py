@@ -4,44 +4,70 @@ import random
 graph = [[0] * 36 for _ in range(36)]
 
 
-def count_opponents(current_pot, current_i, other_pot):
-    return sum(graph[current_pot*9 + current_i][other_pot*9:(other_pot+1)*9])
+def count_opponents(pot, i, other_pot):
+    return sum(graph[pot*9 + i][other_pot*9:(other_pot+1)*9])
 
 
-def random_opponents(current_pot, current_i, opponent_pot, nb_opponents):
-    possible_opponents = []
+def possible_opponents(pot, i, opponent_pot, nb_opponents):
+    opponents = []
     for opponent_i in range(9):
-        if (current_pot, current_i) != (opponent_pot, opponent_i):
-            if count_opponents(opponent_pot, opponent_i, current_pot) < 2:
-                if fill_graph((opponent_pot + 1) % 4, (current_i + (opponent_pot == 0)) % 9, current_pot + (current_i + opponent_pot == 0)):
-                    possible_opponents.append(opponent_i)
-    if nb_opponents == 0:
-        return random.sample(possible_opponents, 2)
+        if (pot, i) != (opponent_pot, opponent_i) and count_opponents(opponent_pot, opponent_i, pot) < 2:
+            opponents.append(opponent_i)
+    if nb_opponents >= 2:
+        return []
     elif nb_opponents == 1:
-        return random.choice(possible_opponents)
+        return opponents
+    elif nb_opponents == 0:
+        return [(opponents[i], opponents[j]) for i in range(len(opponents)) for j in range(i+1, len(opponents))]
+    
 
-
-def fill_graph(current_pot, current_i, opponent_pot):
-    if current_pot == 4:  # no more team to place
-        print("Done")
+def fill_graph(pot, i, opponent_pot):
+    if pot == 4: # no more team to place
         return True
     else:
-        nb_opponents = count_opponents(current_pot, current_i, opponent_pot)
-        opponent = random_opponents(current_pot, current_i, opponent_pot, nb_opponents) 
-        if nb_opponents == 0:  
-            opponent_1, opponent_2 = opponent[0], opponent[1]           
-            graph[current_pot*9 + current_i][opponent_pot*9 + opponent_1] = 1
-            graph[opponent_pot*9 + opponent_1][current_pot*9 + current_i] = 1
-            graph[current_pot*9 + current_i][opponent_pot*9 + opponent_2] = 1
-            graph[opponent_pot*9 + opponent_2][current_pot*9 + current_i] = 1
+        nb_opponents = count_opponents(pot, i, opponent_pot)
+        if nb_opponents > 2:
+            return False
+        elif nb_opponents == 2:
+            return fill_graph(pot + (i + opponent_pot == 11), (i + (opponent_pot == 3)) % 9, (opponent_pot + 1) % 4)
         elif nb_opponents == 1:
-            graph[current_pot*9 + current_i][opponent_pot*9 + opponent] = 1
-            graph[opponent_pot*9 + opponent][current_pot*9 + current_i] = 1
-        opponent_pot = (opponent_pot + 1) % 4
-        current_i = (current_i + (opponent_pot == 0)) % 9
-        current_pot = current_pot + (current_i + opponent_pot == 0)
-        fill_graph(current_pot, current_i, opponent_pot)
-
+            opponents = []
+            for opponent_i in possible_opponents(pot, i, opponent_pot, nb_opponents):
+                graph[pot*9 + i][opponent_pot*9 + opponent_i] = 1
+                graph[opponent_pot*9 + opponent_i][pot*9 + i] = 1
+                if fill_graph(pot + (i + opponent_pot == 11), (i + (opponent_pot == 3)) % 9, (opponent_pot + 1) % 4):
+                    opponents.append(opponent_i)
+                graph[pot*9 + i][opponent_pot*9 + opponent_i] = 0
+                graph[opponent_pot*9 + opponent_i][pot*9 + i] = 0
+            if len(opponents) == 0:
+                return False
+            else:
+                random_opponent_i = random.choice(opponents)
+                graph[pot*9 + i][opponent_pot*9 + random_opponent_i] = 1
+                graph[opponent_pot*9 + random_opponent_i][pot*9 + i] = 1
+                return fill_graph(pot + (i + opponent_pot == 11), (i + (opponent_pot == 3)) % 9, (opponent_pot + 1) % 4)
+        elif nb_opponents == 0: 
+            opponents = []
+            for (opponent_i, opponent_j) in possible_opponents(pot, i, opponent_pot, nb_opponents):
+                graph[pot*9 + i][opponent_pot*9 + opponent_i] = 1
+                graph[opponent_pot*9 + opponent_i][pot*9 + i] = 1
+                graph[pot*9 + i][opponent_pot*9 + opponent_j] = 1
+                graph[opponent_pot*9 + opponent_j][pot*9 + i] = 1
+                if fill_graph(pot + (i + opponent_pot == 11), (i + (opponent_pot == 3)) % 9, (opponent_pot + 1) % 4):
+                    opponents.append((opponent_i, opponent_j))
+                graph[pot*9 + i][opponent_pot*9 + opponent_i] = 0
+                graph[opponent_pot*9 + opponent_i][pot*9 + i] = 0
+                graph[pot*9 + i][opponent_pot*9 + opponent_j] = 0
+                graph[opponent_pot*9 + opponent_j][pot*9 + i] = 0
+            if len(opponents) == 0:
+                return False
+            else:
+                (random_opponent_i, random_opponent_j) = random.choice(opponents)
+                graph[pot*9 + i][opponent_pot*9 + random_opponent_i] = 1
+                graph[opponent_pot*9 + random_opponent_i][pot*9 + i] = 1
+                graph[pot*9 + i][opponent_pot*9 + random_opponent_j] = 1
+                graph[opponent_pot*9 + random_opponent_j][pot*9 + i] = 1
+                return fill_graph(pot + (i + opponent_pot == 11), (i + (opponent_pot == 3)) % 9, (opponent_pot + 1) % 4)
 
 fill_graph(0, 0, 0)
 print(graph)
