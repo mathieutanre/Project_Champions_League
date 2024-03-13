@@ -165,7 +165,6 @@ rencontres_BC = rencontres_inter_pots("B", "C", rencontres)
 rencontres_BD = rencontres_inter_pots("B", "D", rencontres)
 
 li_rencontres_interpots = [rencontres, rencontres_AB, rencontres_AC, rencontres_AD, rencontres_BC, rencontres_BD]
-
 for li_rencontres in li_rencontres_interpots:
     # Création du graphe orienté
     

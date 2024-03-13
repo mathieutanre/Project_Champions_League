@@ -13,6 +13,15 @@ T = 8
 # Variables supplémentaires pour contrôler les breaks
 @variable(model, break_var[1:N, 2:6], Bin)
 
+# Variables supplémentaires pour contrôler les repétitions BB --> Tourne dans le vide
+#@variable(model, repetBB_var[1:N, 1:7], Bin)
+#@variable(model, repetCC_var[1:N, 1:7], Bin)
+#@variable(model, repetDD_var[1:N, 1:7], Bin)
+
+# Variables supplémentaires pour contrôler les suites de 3 matchs AB et CD
+#@variable(model, repetCD3_var[1:N, 1:6], Bin)
+#@variable(model, repetAB3_var[1:N, 1:6], Bin)
+
 
 # Variables supplémentaires pour les matchs de chaque pot
 @variable(model, two_matches_potA[1:T], Bin)
@@ -43,7 +52,7 @@ for i in 1:N
 end
 
 # Contrainte pour s'assurer de l'homogénéité de la difficulté au cours du temps
-# On s'assure d'avoir exactement 2 matchs contre A et B les quatres premiers jours
+ #On s'assure d'avoir exactement 2 matchs contre A et B les quatres premiers jours
 for i in 1:N
     @constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 1:18 for t in 1:4) == 2)
 end
@@ -54,18 +63,19 @@ end
 
 
 #On peut attribuer une difficulté aux matchs contre A = 12 contre B = 10 contre C = 8 contre D=6
-#Difficulté totale = 2*(12+10+8+6) = 72 car on joue deux fois contre toutes les catégories
-# 3*72 / 8 = 27
-# on peut essayer de demander une difficulté comprise entre 26 et 28 pour toute période de trois matchs comme res entier entre 7 et 8
+#Difficulté totale = 2*(15+10+8+5) = 76 car on joue deux fois contre toutes les catégories
+# 3*76 / 8 = 28,5
+# on peut essayer de demander une difficulté comprise entre 21 et 35 pour toute période de trois matchs comme res entier entre 7 et 8
 # A verifier: est ce que cela évite les effets de carry over -> on ne peut pas avoir deux fois A dans un laps de temps de 3 jours ok
+# Solution en 347s
 
 #for i in 1:N
 #    for t in 1:(T-2)
-#        @constraint(model, 26 <= 
-#            12 * sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2] for j in 1:9) + 
+#        @constraint(model, 21 <= 
+#            15 * sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2] for j in 1:9) + 
 #            10 * sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2] for j in 10:18) + 
 #            8 * sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2] for j in 19:27) + 
-#            6 * sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2] for j in 28:N) <= 28)
+#            5 * sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2] for j in 28:N) <= 35)
 #    end
 #end
 
@@ -118,13 +128,13 @@ end
 
 # Contraintes pour s'assurer qu'il y a exactement 2 jours avec 3 matchs inter-pots pour les couples (A,B) et (C,D)
 @constraint(model, sum(three_matches_potsAB[t] for t in 1:T) == 2)
-@constraint(model, sum(three_matches_potsCD[t] for t in 1:T) == 2)
+#@constraint(model, sum(three_matches_potsCD[t] for t in 1:T) == 2)
 
 
 # Contraintes pour s'assurer que chaque jour a ou bien 2 ou bien 3 matchs inter-pots (A,B) et (c,D)
 for t in 1:T
     @constraint(model, sum(x[i, j, t] + x[j, i, t] for i in 1:9, j in 10:18) == 2 + three_matches_potsAB[t])
-    @constraint(model, sum(x[i, j, t] + x[j, i ,t] for i in 19:27, j in 28:36) == 2 + three_matches_potsCD[t])
+ #   @constraint(model, sum(x[i, j, t] + x[j, i ,t] for i in 19:27, j in 28:36) == 2 + three_matches_potsCD[t])
 end
 
 # Fonction pour ajouter une contrainte de matchs minimum maximum entre deux pots par journée
@@ -191,11 +201,46 @@ function add_no_consecutive_inter_pot_matches_constraint_2(pot_start, pot_end)
     end
 end
 
-# Appliquer la contrainte pour tous les pots
-add_no_consecutive_inter_pot_matches_constraint_3(1, 9)   # avec Pot A
-#add_no_consecutive_inter_pot_matches_constraint_2(28, 36) # avec Pot D
+# Appliquer la contrainte pour tous les pots pas de répétitino AA ou DD
+add_no_consecutive_inter_pot_matches_constraint_2(1, 9)   # avec Pot A
+add_no_consecutive_inter_pot_matches_constraint_2(28, 36) # avec Pot D
 #add_no_consecutive_inter_pot_matches_constraint_2(10, 18) # avec Pot B
 #add_no_consecutive_inter_pot_matches_constraint_3(19, 27) # avec pot C
+
+
+
+
+
+
+
+# Contrainte pour limiter les breaks à 1 maximum par équipe BB CC ou DD
+
+
+#for i in 1:N
+#    for t in 1:7
+#        @constraint(model, sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] for j in 10:18) <= 1 + repetBB_var[i, t])
+#        @constraint(model, sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] for j in 19:27) <= 1 + repetCC_var[i, t])
+#        @constraint(model, sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] for j in 28:36) <= 1 + repetDD_var[i, t])
+#    end
+#    for t in 1:5
+#        @constraint(model, repetBB_var[i,t] + repetBB_var[i,t+1] + repetBB_var[i,t+2] +
+#                           repetCC_var[i,t] + repetCC_var[i,t+1] + repetCC_var[i,t+2] +
+#                           repetDD_var[i,t] + repetDD_var[i,t+1] + repetDD_var[i,t+2] <= 2)
+#    end
+#end
+
+
+#    @constraint(model, sum(repetBB_var[i, t] for t in 1:7) <= 1)
+#    @constraint(model, sum(repetCC_var[i, t] for t in 1:7) <= 1)
+#    @constraint(model, sum(repetDD_var[i, t] for t in 1:7) <= 1)
+#end
+
+
+
+#for i in 1:N
+#    @constraint(model, sum(repetBB_var[i, t] + repetCC_var[i, t]  for t in 1:7) <= 1)  #Une seule répétition possible
+#end                                                                                                         #Pas de CC ---- DD par exemple
+# 
 
 
 #for i in 1:N
@@ -206,6 +251,21 @@ add_no_consecutive_inter_pot_matches_constraint_3(1, 9)   # avec Pot A
     #@constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 19:27, t in 7:8) <= 1)
     #@constraint(model, sum(x[i, j, t] + x[j, i, t] for j in 19:27, t in 1:2) <= 1)
 #end
+
+
+#Empecher de jouer 3 fois d'affilé contre (C ou D) ou (A ou B)
+
+#for i in 1:N
+#    for t in 1:6
+#    @constraint(model, sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2]
+#      for j in 19:36) <= 2)
+#    @constraint(model, sum(x[i, j, t] + x[j, i, t] + x[i, j, t+1] + x[j, i, t+1] + x[i, j, t+2] + x[j, i, t+2]
+#      for j in 1:18) <= 2)
+#    end
+#end
+
+
+
 
 #@objective(model, Min, sum(break_var[i, t] for i in 1:N, t in 2:6))
 
@@ -225,11 +285,22 @@ optimize!(model)
 if termination_status(model) == MOI.OPTIMAL || termination_status(model) == MOI.FEASIBLE
     println("Une solution a été trouvée.")
 
-    breaks = 0
-    breaks = sum(value(break_var[i, t]) for i in 1:N for t in 2:6 if value(break_var[i, t]) > 0.5)
-    println("Nombre de breaks : $(breaks)")    
+#    breaks = 0
+#    breaks = sum(value(break_var[i, t]) for i in 1:N for t in 2:6 if value(break_var[i, t]) > 0.5)
+#    println("Nombre de breaks : $(breaks)")    
 
-    # Créer une structure pour stocker le calendrier des matchs
+#    repetitionBB = 0
+#    repetitionBB = sum(value(repetBB_var[i, t]) for i in 1:N for t in 1:7 if value(repetBB_var[i, t]) > 0.5)
+#    println("Nombre de répétition B-B : $(repetitionBB)") 
+#    repetitionCC = 0
+#    repetitionCC = sum(value(repetCC_var[i, t]) for i in 1:N for t in 1:7 if value(repetCC_var[i, t]) > 0.5)
+#    println("Nombre de répétition C-C : $(repetitionCC)") 
+#    repetitionDD = 0
+#    repetitionDD = sum(value(repetCC_var[i, t]) for i in 1:N for t in 1:7 if value(repetDD_var[i, t]) > 0.5)
+#    println("Nombre de répétition D-D : $(repetitionDD)") 
+
+
+    #Créer une structure pour stocker le calendrier des matchs
     match_schedule = Dict()
 
     # Parcourir toutes les combinaisons d'équipes et de journées
