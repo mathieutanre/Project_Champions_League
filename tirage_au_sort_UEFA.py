@@ -2,70 +2,72 @@ import random
 import numpy as np
 
 
-def is_feasible(graph, pot, i, opponent_pot): 
-    if pot == 4:
-        return True
-    else:
-        home_opponents = []
-        if np.sum(graph[9*pot+i, opponent_pot*9:(opponent_pot+1)*9]) == 1:
-            home_opponents.append(np.argmax(graph[9*pot+i, opponent_pot*9:(opponent_pot+1)*9])%9)
+def is_fillable(graph, pot, opponent_pot): 
+    def aux(graph, i):
+        if i==9:
+            return True
         else:
-            for j in range(9):
-                if (pot, i) != (opponent_pot, j) and np.sum(graph[9*pot:9*(pot+1), 9*opponent_pot+j]) == 0 and graph[9*opponent_pot+j, 9*pot+i] == 0:
-                    home_opponents.append(j)
-        away_opponents = []
-        if np.sum(graph[9*opponent_pot:9*(opponent_pot+1), 9*pot+i]) == 1:
-            away_opponents.append(np.argmax(graph[9*opponent_pot:9*(opponent_pot+1), 9*pot+i])%9)
-        else:
-            for j in range(9):
-                if (pot, i) != (opponent_pot, j) and np.sum(graph[9*opponent_pot+j, 9*pot:9*(pot+1)]) == 0 and graph[9*pot+i, 9*opponent_pot+j] == 0:
-                    away_opponents.append(j)
-        potential_opponents = [(x, y) for x in home_opponents for y in away_opponents if x != y]
-        for (home, away) in potential_opponents:
-            copy_graph = np.copy(graph)
-            copy_graph[9*pot+i, 9*opponent_pot+home] = 1
-            copy_graph[9*opponent_pot+away, 9*pot+i] = 1
-            if is_feasible(copy_graph, pot+(i+opponent_pot==11), (i+(opponent_pot==3))%9, (opponent_pot+1)%4):
-                return True
+            possible_ones = [j for j in range(9) if graph[9*pot+i, 9*opponent_pot+j] != -1]
+            for j in possible_ones:
+                new_graph = np.copy(graph)
+                new_graph[9*pot+i, 9*opponent_pot+j] = 1
+                for k in range(9):
+                    if k != j:
+                        new_graph[9*pot+i, 9*opponent_pot+k] = -1
+                    if k != i:
+                        new_graph[9*pot+k, 9*opponent_pot+j] = -1
+                if aux(new_graph, i+1):
+                    return True
+            return False
+    return aux(graph, 0)
+        
 
-
-def all_opponents(graph, pot, i, opponent_pot):
-    home_opponents = []
-    if np.sum(graph[9*pot+i, opponent_pot*9:(opponent_pot+1)*9]) == 1:
-        home_opponents.append(np.argmax(graph[9*pot+i, opponent_pot*9:(opponent_pot+1)*9])%9)
-    else:
-        for j in range(9):
-            if (pot, i) != (opponent_pot, j) and np.sum(graph[9*pot:9*(pot+1), 9*opponent_pot+j]) == 0 and graph[9*opponent_pot+j, 9*pot+i] == 0:
-                home_opponents.append(j)
-    away_opponents = []
-    if np.sum(graph[9*opponent_pot:9*(opponent_pot+1), 9*pot+i]) == 1:
-        away_opponents.append(np.argmax(graph[9*opponent_pot:9*(opponent_pot+1), 9*pot+i])%9)
-    else:
-        for j in range(9):
-            if (pot, i) != (opponent_pot, j) and np.sum(graph[9*opponent_pot+j, 9*pot:9*(pot+1)]) == 0 and graph[9*pot+i, 9*opponent_pot+j] == 0:
-                away_opponents.append(j)
-    possible_opponents = [(x, y) for x in home_opponents for y in away_opponents if x != y]
-    opponents = []
-    for (home, away) in possible_opponents:
-        copy_graph = np.copy(graph)
-        copy_graph[9*pot+i, 9*opponent_pot+home] = 1
-        copy_graph[9*opponent_pot+away, 9*pot+i] = 1
-        if is_feasible(copy_graph, pot+(i+opponent_pot==11), (i+(opponent_pot==3))%9, (opponent_pot+1)%4):
-            opponents.append((home, away))
-    return opponents
-
+def all_matches(graph, pot, i, opponent_pot):
+    home_opponents = [j for j in range(9) if graph[9*pot+i, 9*opponent_pot+j] != -1]
+    away_opponents = [j for j in range(9) if graph[9*opponent_pot+j, 9*pot+i] != -1]
+    possible_matches = [(x, y) for x in home_opponents for y in away_opponents if x != y]
+    for (home, away) in possible_matches:
+        new_graph = np.copy(graph)
+        new_graph[9*pot+i, 9*opponent_pot+home] = 1
+        for k in range(9):
+            if k != home:
+                new_graph[9*pot+i, 9*opponent_pot+k] = -1
+            if k != i:
+                new_graph[9*pot+k, 9*opponent_pot+home] = -1
+        new_graph[9*opponent_pot+away, 9*pot+i] = 1
+        for k in range(9):
+            if k != away:
+                new_graph[9*opponent_pot+k, 9*pot+i] = -1
+            if k != i:
+                new_graph[9*opponent_pot+away, 9*pot+k] = -1
+        if not is_fillable(new_graph, pot, opponent_pot) or not is_fillable(new_graph, opponent_pot, pot):
+            possible_matches.remove((home, away))
+    return possible_matches
+    
 
 def tirage_au_sort(graph):
     for pot in range(4):
         for i in range(9):
             opponents = []
             for opponent_pot in range(4):
-                (home, away) = random.choice(all_opponents(graph, pot, i, opponent_pot))
+                (home, away) = random.choice(all_matches(graph, pot, i, opponent_pot))
                 graph[9*pot+i, 9*opponent_pot+home] = 1
+                for k in range(9):
+                    if k != home:
+                        graph[9*pot+i, 9*opponent_pot+k] = -1
+                    if k != i:
+                        graph[9*pot+k, 9*opponent_pot+home] = -1
                 graph[9*opponent_pot+away, 9*pot+i] = 1
+                for k in range(9):
+                    if k != away:
+                        graph[9*opponent_pot+k, 9*pot+i] = -1
+                    if k != i:
+                        graph[9*opponent_pot+away, 9*pot+k] = -1
                 opponents.append((home, away))
             print("Opponents of team {} from pot {}: {}".format(i, pot, opponents))
+            print(graph[9*pot+i])
 
 
 graph = np.zeros((36, 36))
+np.fill_diagonal(graph, -1)
 tirage_au_sort(graph)
