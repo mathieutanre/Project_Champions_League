@@ -1,5 +1,13 @@
 import random
 import numpy as np
+import csv
+
+
+def write_to_csv(matches):
+    with open("tirage_au_sort_1.csv", "w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        for match in matches:
+            writer.writerow(match)
 
 
 def is_fillable(graph, pot, opponent_pot): # checks if the quadrants (pot, opponent_pot) and (opponent_pot, pot) can be filled
@@ -59,6 +67,7 @@ def all_matches(graph, pot, i, opponent_pot): # returns all the matches possible
     
 
 def tirage_au_sort(graph):
+    matches_list = []
     for pot in range(4):
         for i in range(9):
             opponents = []
@@ -79,9 +88,9 @@ def tirage_au_sort(graph):
                     if k != i:
                         graph[9*opponent_pot+away, 9*pot+k] = 0
                 opponents.append("({}{}, {}{})".format(chr(ord('A') + opponent_pot), home+1, chr(ord('A') + opponent_pot), away+1))
-            print("Opponents of {}{} :".format(chr(ord('A') + pot), i+1), opponents)
-    for i in range(36):
-        print(graph[i])
+            matches_list.append(opponents)
+    write_to_csv(matches_list)
+    print("CSV file 'tirage_au_sort_1.csv' has been generated successfully.")
 
 graph = np.array([[None for _ in range(36)] for _ in range(36)])
 np.fill_diagonal(graph, 0)
