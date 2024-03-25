@@ -42,6 +42,81 @@ teams = [[{"club": "ManCity", "nationality": "England"},
            {"club": "Lens", "nationality": "France"}]]
 
 
+count_nationalities = [
+    [{"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}],
+    [{"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}],
+    [{"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}],
+    [{"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
+     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
+      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}]]
+
+
 def init_graph(): 
     '''Renvoie la matrice de taille 36x36 avec None si le match est
        possible et 0 s'il est impossible (même nationalité et diagonale)'''
@@ -106,7 +181,22 @@ def is_fillable(graph):
     return True
 
 
-def all_matches(graph, pot, i, opponent_pot): 
+def updates_nationality(graph, count_nationalities, pot, i, nat):
+    if count_nationalities[pot][i][nat] < 2:
+        return True
+    elif count_nationalities[pot][i][nat] == 2:
+        for opponent_pot in range(4):
+            for opponent_i in range(9):
+                if teams[opponent_pot][opponent_i]["nationality"] == nat:
+                    if graph[9*pot+i, 9*opponent_pot+opponent_i] != 1:
+                        graph[9*pot+i, 9*opponent_pot+opponent_i] = 0
+                    if graph[9*opponent_pot+opponent_i, 9*pot+i] != 1:
+                        graph[9*opponent_pot+opponent_i, 9*pot+i] = 0
+        return True
+    return False
+
+
+def all_matches(graph, count_nationalities, pot, i, opponent_pot): 
     '''Retourne l'ensemble des matchs possibles entre l'équipe (pot, i) et les 
     équipes du pot opponent_pot en vérifiant récursivement qu'on peut compléter la matrice'''
     home_opponents = [j for j in range(9) if graph[9*pot+i, 9*opponent_pot+j] != 0]
@@ -115,21 +205,33 @@ def all_matches(graph, pot, i, opponent_pot):
     true_matches = []
     for (home, away) in possible_matches:
         new_graph = np.copy(graph)
+        new_count_nationalities = np.copy(count_nationalities)
+        nat = teams[pot][i]["nationality"]
+        nat_home = teams[opponent_pot][home]["nationality"]
         new_graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
+        new_count_nationalities[pot][i][nat_home] += 1
+        new_count_nationalities[opponent_pot][home][nat] += 1
         new_graph[9*opponent_pot+home, 9*pot+i] = 0 # no return
         for k in range(9):
             if k != home:
                 new_graph[9*pot+i, 9*opponent_pot+k] = 0
             if k != i:
                 new_graph[9*pot+k, 9*opponent_pot+home] = 0
+        nat_away = teams[opponent_pot][away]["nationality"]
         new_graph[9*opponent_pot+away, 9*pot+i] = 1 # away match
+        new_count_nationalities[pot][i][nat_away] += 1
+        new_count_nationalities[opponent_pot][away][nat] += 1
         new_graph[9*pot+i, 9*opponent_pot+away] = 0 # no return
         for k in range(9):
             if k != away:
                 new_graph[9*opponent_pot+k, 9*pot+i] = 0
             if k != i:
                 new_graph[9*opponent_pot+away, 9*pot+k] = 0
-        if is_fillable(new_graph):
+        if (updates_nationality(new_graph, new_count_nationalities, pot, i, nat_home) 
+            and updates_nationality(new_graph, new_count_nationalities, opponent_pot, home, nat)
+            and updates_nationality(new_graph, new_count_nationalities, pot, i, nat_away)
+            and updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat)
+            and is_fillable(new_graph)):
             true_matches.append((home, away))
     return true_matches
     
@@ -141,17 +243,24 @@ def tirage_au_sort(graph):
         indices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         rd.shuffle(indices)
         for i in indices:
-            opponents = [teams[pot][i]["club"]]
+            opponents = [teams[pot][i]["club"]] # juste pour affichage
             for opponent_pot in range(4):
-                (home, away) = random.choice(all_matches(graph, pot, i, opponent_pot))
+                (home, away) = random.choice(all_matches(graph, count_nationalities, pot, i, opponent_pot))
+                nat = teams[pot][i]["nationality"]
+                nat_home = teams[opponent_pot][home]["nationality"]
                 graph[9*pot+i, 9*opponent_pot+home] = 1
+                count_nationalities[pot][i][nat_home] += 1
+                count_nationalities[opponent_pot][home][nat] += 1
                 graph[9*opponent_pot+home, 9*pot+i] = 0
                 for k in range(9):
                     if k != home:
                         graph[9*pot+i, 9*opponent_pot+k] = 0
                     if k != i:
                         graph[9*pot+k, 9*opponent_pot+home] = 0
+                nat_away = teams[opponent_pot][away]["nationality"]
                 graph[9*opponent_pot+away, 9*pot+i] = 1
+                count_nationalities[pot][i][nat_away] += 1
+                count_nationalities[opponent_pot][away][nat] += 1
                 graph[9*pot+i, 9*opponent_pot+away] = 0
                 for k in range(9):
                     if k != away:
@@ -160,6 +269,7 @@ def tirage_au_sort(graph):
                         graph[9*opponent_pot+away, 9*pot+k] = 0
                 opponents.append((teams[opponent_pot][home]["club"], teams[opponent_pot][away]["club"]))
             print(opponents)
+            print(count_nationalities)
             matches_list.append(opponents)
     write_to_csv(matches_list)
     print("CSV file 'tirage_au_sort_1.csv' has been generated successfully.")
