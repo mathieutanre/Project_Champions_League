@@ -42,81 +42,6 @@ teams = [[{"club": "ManCity", "nationality": "England"},
            {"club": "Lens", "nationality": "France"}]]
 
 
-count_nationalities = [
-    [{"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}],
-    [{"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}],
-    [{"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}],
-    [{"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}, 
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0},
-     {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0, 
-      "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}]]
-
-
 def init_graph(): 
     '''Renvoie la matrice de taille 36x36 avec None si le match est
        possible et 0 s'il est impossible (même nationalité et diagonale)'''
@@ -133,58 +58,33 @@ def init_graph():
     return graph
 
 
+def init_count_nationalities():
+    '''retourne une liste de dictionnaires qui retient le nombre
+    d'adversaires de chaque nationalité pour chaque équipe'''
+    count_nationalities = []
+    for _ in range(4):
+        count_nationalities_pot = []
+        for _ in range(9):
+            dict = {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0,
+            "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}
+            count_nationalities_pot.append(dict)
+        count_nationalities.append(count_nationalities_pot)
+    return count_nationalities
+
+
 def write_to_csv(matches):
+    '''écrit les matchs dans un autre fichier'''
     with open("tirage_au_sort_1.csv", "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
         for match in matches:
             writer.writerow(match)
 
 
-def block_is_fillable(graph, pot, opponent_pot):
-    '''Regarde si le bloc (pot, opponent_pot) et (opponent_pot, pot) est remplissable
-       avec un 1 par ligne et 1 un par colonne''' 
-    def aux(graph, i):
-        '''Fontion récursive qui vérifie si on peut remplir à partir de la ligne i'''
-        if i==9:
-            return True
-        else:
-            home_opponents = [j for j in range(9) if graph[9*pot+i, 9*opponent_pot+j] != 0]
-            away_opponents = [j for j in range(9) if graph[9*opponent_pot+j, 9*pot+i] != 0]
-            possible_matches = [(x, y) for x in home_opponents for y in away_opponents if x != y]
-            for (home, away) in possible_matches:
-                new_graph = np.copy(graph)
-                new_graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
-                new_graph[9*opponent_pot+home, 9*pot+i] = 0 # no return
-                for k in range(9):
-                    if k != home:
-                        new_graph[9*pot+i, 9*opponent_pot+k] = 0 
-                    if k != i:
-                        new_graph[9*pot+k, 9*opponent_pot+home] = 0
-                new_graph[9*opponent_pot+away, 9*pot+i] = 1 # away match
-                new_graph[9*pot+i, 9*opponent_pot+away] = 0 # no return
-                for k in range(9):
-                    if k != away:
-                        new_graph[9*opponent_pot+k, 9*pot+i] = 0
-                    if k != i:
-                        new_graph[9*opponent_pot+away, 9*pot+k] = 0
-                if aux(graph, i+1):
-                    return True
-            return False
-    return aux(graph, 0)
-
-
-def is_fillable(graph):
-    for pot in range(4):
-        for opponent_pot in range(4):
-            if not block_is_fillable(graph, pot, opponent_pot):
-                return False
-    return True
-
-
 def updates_nationality(graph, count_nationalities, pot, i, nat):
-    if count_nationalities[pot][i][nat] < 2:
-        return True
-    elif count_nationalities[pot][i][nat] == 2:
+    '''met des 0 partout où il ne peut plus y avoir de matchs après avoir
+    choisi le match (pot, i)|(opponent_pot, opponent_i) pour satisfaire 
+    la contrainte qu'une équipe ne peut affronter 2 équipes d'un même pays'''
+    if count_nationalities[pot][i][nat] == 2:
         for opponent_pot in range(4):
             for opponent_i in range(9):
                 if teams[opponent_pot][opponent_i]["nationality"] == nat:
@@ -192,8 +92,58 @@ def updates_nationality(graph, count_nationalities, pot, i, nat):
                         graph[9*pot+i, 9*opponent_pot+opponent_i] = 0
                     if graph[9*opponent_pot+opponent_i, 9*pot+i] != 1:
                         graph[9*opponent_pot+opponent_i, 9*pot+i] = 0
-        return True
-    return False
+
+
+def updates_matches(graph, pot, i, opponent_pot, opponent_i):
+    '''met des 0 partout où il ne peut plus y avoir de matchs après avoir
+    choisi le match (pot, i)|(opponent_pot, opponent_i) pour satisfaire 
+    la (2,2,2,2)-régularité'''
+    graph[9*opponent_pot+opponent_i, 9*pot+i] = 0 # no return
+    for k in range(9): # only one 1 in the line and in the column
+        if k != opponent_i:
+            graph[9*pot+i, 9*opponent_pot+k] = 0 
+        if k != i:
+            graph[9*pot+k, 9*opponent_pot+opponent_i] = 0
+
+
+def block_is_fillable(graph, count_nationalities, pot, opponent_pot):
+    '''Regarde si le bloc (pot, opponent_pot) et (opponent_pot, pot) est remplissable
+       avec un 1 par ligne et 1 un par colonne''' 
+    def aux(graph, count_nationalities, i):
+        '''Fontion récursive qui vérifie si on peut remplir à partir de la ligne i'''
+        if i==9:
+            return True
+        else:
+            home_opponents = [j for j in range(9) if graph[9*pot+i, 9*opponent_pot+j] != 0]
+            away_opponents = [j for j in range(9) if graph[9*opponent_pot+j, 9*pot+i] != 0]
+            possible_matches = [(x, y) for x in home_opponents for y in away_opponents if x != y]
+            nat = teams[pot][i]["nationality"]
+            for (home, away) in possible_matches:
+                new_graph = np.copy(graph)
+                new_count_nationalities = np.copy(count_nationalities)
+                new_graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
+                updates_matches(new_graph, pot, i, opponent_pot, home)
+                new_graph[9*opponent_pot+away, 9*pot+i] = 1 # away match
+                updates_matches(new_graph, pot, i, opponent_pot, away)
+                nat_home = teams[opponent_pot][home]["nationality"]
+                updates_nationality(new_graph, new_count_nationalities, pot, i, nat_home)
+                updates_nationality(new_graph, new_count_nationalities, opponent_pot, home, nat)
+                nat_away = teams[opponent_pot][away]["nationality"]
+                updates_nationality(new_graph, new_count_nationalities, pot, i, nat_away)
+                updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat)            
+                if aux(new_graph, new_count_nationalities, i+1):
+                    return True
+            return False
+    return aux(graph, count_nationalities, 0)
+
+
+def is_fillable(graph, count_nationalities):
+    '''vérifie si la matrice est remplissable en décomposant par quadrant'''
+    for pot in range(4):
+        for opponent_pot in range(4):
+            if not block_is_fillable(graph, count_nationalities, pot, opponent_pot):
+                return False
+    return True
 
 
 def all_matches(graph, count_nationalities, pot, i, opponent_pot): 
@@ -202,71 +152,48 @@ def all_matches(graph, count_nationalities, pot, i, opponent_pot):
     home_opponents = [j for j in range(9) if graph[9*pot+i, 9*opponent_pot+j] != 0]
     away_opponents = [j for j in range(9) if graph[9*opponent_pot+j, 9*pot+i] != 0]
     possible_matches = [(x, y) for x in home_opponents for y in away_opponents if x != y]
+    print(possible_matches)
     true_matches = []
+    nat = teams[pot][i]["nationality"]
     for (home, away) in possible_matches:
         new_graph = np.copy(graph)
         new_count_nationalities = np.copy(count_nationalities)
-        nat = teams[pot][i]["nationality"]
-        nat_home = teams[opponent_pot][home]["nationality"]
         new_graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
-        new_count_nationalities[pot][i][nat_home] += 1
-        new_count_nationalities[opponent_pot][home][nat] += 1
-        new_graph[9*opponent_pot+home, 9*pot+i] = 0 # no return
-        for k in range(9):
-            if k != home:
-                new_graph[9*pot+i, 9*opponent_pot+k] = 0
-            if k != i:
-                new_graph[9*pot+k, 9*opponent_pot+home] = 0
-        nat_away = teams[opponent_pot][away]["nationality"]
+        updates_matches(new_graph, pot, i, opponent_pot, home)
         new_graph[9*opponent_pot+away, 9*pot+i] = 1 # away match
-        new_count_nationalities[pot][i][nat_away] += 1
-        new_count_nationalities[opponent_pot][away][nat] += 1
-        new_graph[9*pot+i, 9*opponent_pot+away] = 0 # no return
-        for k in range(9):
-            if k != away:
-                new_graph[9*opponent_pot+k, 9*pot+i] = 0
-            if k != i:
-                new_graph[9*opponent_pot+away, 9*pot+k] = 0
-        if (updates_nationality(new_graph, new_count_nationalities, pot, i, nat_home) 
-            and updates_nationality(new_graph, new_count_nationalities, opponent_pot, home, nat)
-            and updates_nationality(new_graph, new_count_nationalities, pot, i, nat_away)
-            and updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat)
-            and is_fillable(new_graph)):
+        updates_matches(new_graph, pot, i, opponent_pot, away)
+        nat_home = teams[pot][home]["nationality"]
+        updates_nationality(new_graph, new_count_nationalities, pot, i, nat_home)
+        updates_nationality(new_graph, new_count_nationalities, opponent_pot, home, nat)
+        nat_away = teams[opponent_pot][away]["nationality"]
+        updates_nationality(new_graph, new_count_nationalities, pot, i, nat_away)
+        updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat)           
+        if is_fillable(new_graph, new_count_nationalities):
             true_matches.append((home, away))
     return true_matches
     
 
-def tirage_au_sort(graph):
+def tirage_au_sort(graph, count_nationalities):
     '''Effectue le tirage au sort'''
     matches_list = []
     for pot in range(4):
-        indices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        rd.shuffle(indices)
-        for i in indices:
+        # indices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        # rd.shuffle(indices)
+        for i in range(9):
             opponents = [teams[pot][i]["club"]] # juste pour affichage
+            nat = teams[pot][i]["nationality"]
             for opponent_pot in range(4):
                 (home, away) = random.choice(all_matches(graph, count_nationalities, pot, i, opponent_pot))
-                nat = teams[pot][i]["nationality"]
+                graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
+                updates_matches(graph, pot, i, opponent_pot, home)
+                graph[9*opponent_pot+away, 9*pot+i] = 1 # away match
+                updates_matches(graph, pot, i, opponent_pot, away)
                 nat_home = teams[opponent_pot][home]["nationality"]
-                graph[9*pot+i, 9*opponent_pot+home] = 1
-                count_nationalities[pot][i][nat_home] += 1
-                count_nationalities[opponent_pot][home][nat] += 1
-                graph[9*opponent_pot+home, 9*pot+i] = 0
-                for k in range(9):
-                    if k != home:
-                        graph[9*pot+i, 9*opponent_pot+k] = 0
-                    if k != i:
-                        graph[9*pot+k, 9*opponent_pot+home] = 0
+                updates_nationality(graph, count_nationalities, pot, i, nat_home)
+                updates_nationality(graph, count_nationalities, opponent_pot, home, nat)
                 nat_away = teams[opponent_pot][away]["nationality"]
-                graph[9*opponent_pot+away, 9*pot+i] = 1
-                count_nationalities[pot][i][nat_away] += 1
-                count_nationalities[opponent_pot][away][nat] += 1
-                graph[9*pot+i, 9*opponent_pot+away] = 0
-                for k in range(9):
-                    if k != away:
-                        graph[9*opponent_pot+k, 9*pot+i] = 0
-                    if k != i:
-                        graph[9*opponent_pot+away, 9*pot+k] = 0
+                updates_nationality(graph, count_nationalities, pot, i, nat_away)
+                updates_nationality(graph, count_nationalities, opponent_pot, away, nat)           
                 opponents.append((teams[opponent_pot][home]["club"], teams[opponent_pot][away]["club"]))
             print(opponents)
             print(count_nationalities)
@@ -276,4 +203,6 @@ def tirage_au_sort(graph):
 
 
 graph = init_graph()
-tirage_au_sort(graph)
+count_nationalities = init_count_nationalities()
+print(all_matches(graph, count_nationalities, 0, 0, 0))
+tirage_au_sort(graph, count_nationalities)
