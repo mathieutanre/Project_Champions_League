@@ -2,6 +2,7 @@ import random
 import numpy as np
 import csv
 import random as rd
+import copy
 
 
 teams = [[{"club": "ManCity", "nationality": "England"},
@@ -84,6 +85,7 @@ def updates_nationality(graph, count_nationalities, pot, i, nat):
     '''met des 0 partout où il ne peut plus y avoir de matchs après avoir
     choisi le match (pot, i)|(opponent_pot, opponent_i) pour satisfaire 
     la contrainte qu'une équipe ne peut affronter 2 équipes d'un même pays'''
+    count_nationalities[pot][i][nat] += 1
     if count_nationalities[pot][i][nat] == 2:
         for opponent_pot in range(4):
             for opponent_i in range(9):
@@ -120,7 +122,7 @@ def block_is_fillable(graph, count_nationalities, pot, opponent_pot):
             nat = teams[pot][i]["nationality"]
             for (home, away) in possible_matches:
                 new_graph = np.copy(graph)
-                new_count_nationalities = np.copy(count_nationalities)
+                new_count_nationalities = copy.deepcopy(count_nationalities)
                 new_graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
                 updates_matches(new_graph, pot, i, opponent_pot, home)
                 new_graph[9*opponent_pot+away, 9*pot+i] = 1 # away match
@@ -157,7 +159,7 @@ def all_matches(graph, count_nationalities, pot, i, opponent_pot):
     nat = teams[pot][i]["nationality"]
     for (home, away) in possible_matches:
         new_graph = np.copy(graph)
-        new_count_nationalities = np.copy(count_nationalities)
+        new_count_nationalities = copy.deepcopy(count_nationalities)
         new_graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
         updates_matches(new_graph, pot, i, opponent_pot, home)
         new_graph[9*opponent_pot+away, 9*pot+i] = 1 # away match
@@ -204,5 +206,5 @@ def tirage_au_sort(graph, count_nationalities):
 
 graph = init_graph()
 count_nationalities = init_count_nationalities()
-print(all_matches(graph, count_nationalities, 0, 0, 0))
+print(is_fillable(graph, count_nationalities))
 tirage_au_sort(graph, count_nationalities)
