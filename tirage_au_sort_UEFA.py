@@ -67,7 +67,8 @@ def init_count_nationalities():
         count_nationalities_pot = []
         for _ in range(9):
             dict = {"England": 0, "France": 0, "Germany": 0, "Italy": 0, "Portugal": 0, "Spain": 0,
-            "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, "Netherlands": 0, "Scotland": 0, "Austria": 0}
+                    "Serbia" : 0, "Switzerland" : 0, "Ukraine": 0, "Azerbaijan": 0, "Belgium": 0, 
+                    "Netherlands": 0, "Scotland": 0, "Austria": 0, "Denmark": 0, "Turkey" : 0}
             count_nationalities_pot.append(dict)
         count_nationalities.append(count_nationalities_pot)
     return count_nationalities
@@ -85,7 +86,7 @@ def updates_nationality(graph, count_nationalities, pot, i, nat):
     '''met des 0 partout où il ne peut plus y avoir de matchs après avoir
     choisi le match (pot, i)|(opponent_pot, opponent_i) pour satisfaire 
     la contrainte qu'une équipe ne peut affronter plus de 2 équipes d'un même pays'''
-    if count_nationalities[pot][i][nat] > 2:
+    if count_nationalities[pot][i][nat] == 2:
         for opponent_pot in range(4):
             for opponent_i in range(9):
                 if teams[opponent_pot][opponent_i]["nationality"] == nat:
@@ -126,18 +127,18 @@ def block_is_fillable(graph, count_nationalities, pot, opponent_pot):
                     new_graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
                     updates_matches(new_graph, pot, i, opponent_pot, home)
                     nat_home = teams[opponent_pot][home]["nationality"]
-                    updates_nationality(new_graph, new_count_nationalities, pot, i, nat_home)
                     new_count_nationalities[pot][i][nat_home] += 1
-                    updates_nationality(new_graph, new_count_nationalities, opponent_pot, home, nat)
                     new_count_nationalities[opponent_pot][home][nat] += 1
+                    updates_nationality(new_graph, new_count_nationalities, pot, i, nat_home)
+                    updates_nationality(new_graph, new_count_nationalities, opponent_pot, home, nat)
                 if graph[9*opponent_pot+away, 9*pot+i] != 1:
                     new_graph[9*opponent_pot+away, 9*pot+i] = 1 # away match
-                    updates_matches(new_graph, pot, i, opponent_pot, away)
+                    updates_matches(new_graph, opponent_pot, away, pot, i)
                     nat_away = teams[opponent_pot][away]["nationality"]
-                    updates_nationality(new_graph, new_count_nationalities, pot, i, nat_away)
                     new_count_nationalities[pot][i][nat_away] += 1
-                    updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat)  
-                    new_count_nationalities[opponent_pot][away][nat] += 1          
+                    new_count_nationalities[opponent_pot][away][nat] += 1
+                    updates_nationality(new_graph, new_count_nationalities, pot, i, nat_away)
+                    updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat)            
                 if aux(new_graph, new_count_nationalities, i+1):
                     return True
             return False
@@ -159,7 +160,6 @@ def all_matches(graph, count_nationalities, pot, i, opponent_pot):
     home_opponents = [j for j in range(9) if graph[9*pot+i, 9*opponent_pot+j] != 0]
     away_opponents = [j for j in range(9) if graph[9*opponent_pot+j, 9*pot+i] != 0]
     possible_matches = [(x, y) for x in home_opponents for y in away_opponents if x != y]
-    print(possible_matches)
     true_matches = []
     nat = teams[pot][i]["nationality"]
     for (home, away) in possible_matches:
@@ -169,18 +169,18 @@ def all_matches(graph, count_nationalities, pot, i, opponent_pot):
             new_graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
             updates_matches(new_graph, pot, i, opponent_pot, home)
             nat_home = teams[opponent_pot][home]["nationality"]
-            updates_nationality(new_graph, new_count_nationalities, pot, i, nat_home)
             new_count_nationalities[pot][i][nat_home] += 1
-            updates_nationality(new_graph, new_count_nationalities, opponent_pot, home, nat)
             new_count_nationalities[opponent_pot][home][nat] += 1
+            updates_nationality(new_graph, new_count_nationalities, pot, i, nat_home)
+            updates_nationality(new_graph, new_count_nationalities, opponent_pot, home, nat)
         if graph[9*opponent_pot+away, 9*pot+i] != 1:
             new_graph[9*opponent_pot+away, 9*pot+i] = 1 # away match
-            updates_matches(new_graph, pot, i, opponent_pot, away)
+            updates_matches(new_graph, opponent_pot, away, pot, i)
             nat_away = teams[opponent_pot][away]["nationality"]
-            updates_nationality(new_graph, new_count_nationalities, pot, i, nat_away)
             new_count_nationalities[pot][i][nat_away] += 1
-            updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat)  
-            new_count_nationalities[opponent_pot][away][nat] += 1        
+            new_count_nationalities[opponent_pot][away][nat] += 1 
+            updates_nationality(new_graph, new_count_nationalities, pot, i, nat_away)
+            updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat)         
         if is_fillable(new_graph, new_count_nationalities):
             true_matches.append((home, away))
     return true_matches
@@ -190,9 +190,9 @@ def tirage_au_sort(graph, count_nationalities):
     '''Effectue le tirage au sort'''
     matches_list = []
     for pot in range(4):
-        # indices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        # rd.shuffle(indices)
-        for i in range(9):
+        indices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        rd.shuffle(indices)
+        for i in indices:
             opponents = [teams[pot][i]["club"]] # juste pour affichage
             nat = teams[pot][i]["nationality"]
             for opponent_pot in range(4):
@@ -201,21 +201,20 @@ def tirage_au_sort(graph, count_nationalities):
                     graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
                     updates_matches(graph, pot, i, opponent_pot, home)
                     nat_home = teams[opponent_pot][home]["nationality"]
-                    updates_nationality(graph, count_nationalities, pot, i, nat_home)
                     count_nationalities[pot][i][nat_home] += 1
-                    updates_nationality(graph, count_nationalities, opponent_pot, home, nat)
                     count_nationalities[opponent_pot][home][nat] += 1
+                    updates_nationality(graph, count_nationalities, pot, i, nat_home)
+                    updates_nationality(graph, count_nationalities, opponent_pot, home, nat)
                 if graph[9*opponent_pot+away, 9*pot+i] != 1:
                     graph[9*opponent_pot+away, 9*pot+i] = 1 # away match
-                    updates_matches(graph, pot, i, opponent_pot, away)
+                    updates_matches(graph, opponent_pot, away, pot, i)
                     nat_away = teams[opponent_pot][away]["nationality"]
-                    updates_nationality(graph, count_nationalities, pot, i, nat_away)
                     count_nationalities[pot][i][nat_away] += 1
-                    updates_nationality(graph, count_nationalities, opponent_pot, away, nat)  
-                    count_nationalities[opponent_pot][away][nat] += 1         
+                    count_nationalities[opponent_pot][away][nat] += 1 
+                    updates_nationality(graph, count_nationalities, pot, i, nat_away)
+                    updates_nationality(graph, count_nationalities, opponent_pot, away, nat)          
                 opponents.append((teams[opponent_pot][home]["club"], teams[opponent_pot][away]["club"]))
             print(opponents)
-            print(count_nationalities)
             matches_list.append(opponents)
     write_to_csv(matches_list)
     print("CSV file 'tirage_au_sort_1.csv' has been generated successfully.")
@@ -223,5 +222,4 @@ def tirage_au_sort(graph, count_nationalities):
 
 graph = init_graph()
 count_nationalities = init_count_nationalities()
-print(is_fillable(graph, count_nationalities))
 tirage_au_sort(graph, count_nationalities)
