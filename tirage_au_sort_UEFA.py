@@ -108,12 +108,46 @@ def updates_matches(graph, pot, i, opponent_pot, opponent_i):
             graph[9*pot+k, 9*opponent_pot+opponent_i] = 0
 
 
+# def is_fillable(graph, count_nationalities):
+#    def aux(graph, count_nationalities, pot, i, opponent_pot):
+#        if pot == 4:
+#            return True
+#        else:
+#            home_opponents = [j for j in range(9) if graph[9*pot+i, 9*opponent_pot+j] != 0]
+#            away_opponents = [j for j in range(9) if graph[9*opponent_pot+j, 9*pot+i] != 0]
+#            possible_matches = [(x, y) for x in home_opponents for y in away_opponents if x != y]
+#            nat = teams[pot][i]["nationality"]
+#            for (home, away) in possible_matches:
+#                new_graph = np.copy(graph)
+#                new_count_nationalities = copy.deepcopy(count_nationalities)
+#                if graph[9*pot+i, 9*opponent_pot+home] != 1: # match pas déjà tiré
+#                    new_graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
+#                    updates_matches(new_graph, pot, i, opponent_pot, home)
+#                    nat_home = teams[opponent_pot][home]["nationality"]
+#                    new_count_nationalities[pot][i][nat_home] += 1
+#                    new_count_nationalities[opponent_pot][home][nat] += 1
+#                    updates_nationality(new_graph, new_count_nationalities, pot, i, nat_home)
+#                    updates_nationality(new_graph, new_count_nationalities, opponent_pot, home, nat)
+#                if graph[9*opponent_pot+away, 9*pot+i] != 1:
+#                    new_graph[9*opponent_pot+away, 9*pot+i] = 1 # away match
+#                    updates_matches(new_graph, opponent_pot, away, pot, i)
+#                    nat_away = teams[opponent_pot][away]["nationality"]
+#                    new_count_nationalities[pot][i][nat_away] += 1
+#                    new_count_nationalities[opponent_pot][away][nat] += 1
+#                    updates_nationality(new_graph, new_count_nationalities, pot, i, nat_away)
+#                    updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat) 
+#                new_opponent_pot = (opponent_pot+1)%4
+#                new_i = (i + new_opponent_pot==0)%9
+#                new_pot = pot + new_i ==0           
+#                if aux(new_graph, new_count_nationalities, new_pot, new_i, new_opponent_pot): # récursif
+#                    return True
+#            return False
+#    return aux(graph, count_nationalities, 0, 0, 0)
+            
+
 def block_is_fillable(graph, count_nationalities, pot, opponent_pot):
-    '''Regarde si le bloc (pot, opponent_pot) et (opponent_pot, pot) est remplissable
-       avec un 1 par ligne et 1 un par colonne''' 
     def aux(graph, count_nationalities, i):
-        '''Fontion récursive qui vérifie si on peut remplir à partir de la ligne i'''
-        if i==9:
+        if i == 9:
             return True
         else:
             home_opponents = [j for j in range(9) if graph[9*pot+i, 9*opponent_pot+j] != 0]
@@ -138,15 +172,14 @@ def block_is_fillable(graph, count_nationalities, pot, opponent_pot):
                     new_count_nationalities[pot][i][nat_away] += 1
                     new_count_nationalities[opponent_pot][away][nat] += 1
                     updates_nationality(new_graph, new_count_nationalities, pot, i, nat_away)
-                    updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat)            
-                if aux(new_graph, new_count_nationalities, i+1):
+                    updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat)        
+                if aux(new_graph, new_count_nationalities, i+1): 
                     return True
             return False
     return aux(graph, count_nationalities, 0)
-
+            
 
 def is_fillable(graph, count_nationalities):
-    '''vérifie si la matrice est remplissable en décomposant par quadrant'''
     for pot in range(4):
         for opponent_pot in range(4):
             if not block_is_fillable(graph, count_nationalities, pot, opponent_pot):
@@ -183,8 +216,7 @@ def all_matches(graph, count_nationalities, pot, i, opponent_pot):
             updates_nationality(new_graph, new_count_nationalities, opponent_pot, away, nat)         
         if is_fillable(new_graph, new_count_nationalities):
             true_matches.append((home, away))
-    return true_matches
-    
+
 
 def tirage_au_sort(graph, count_nationalities):
     '''Effectue le tirage au sort'''
@@ -194,8 +226,10 @@ def tirage_au_sort(graph, count_nationalities):
         rd.shuffle(indices)
         for i in indices:
             opponents = [teams[pot][i]["club"]] # juste pour affichage
+            print(teams[pot][i])
             nat = teams[pot][i]["nationality"]
             for opponent_pot in range(4):
+                print(all_matches(graph, count_nationalities, pot, i, opponent_pot))
                 (home, away) = random.choice(all_matches(graph, count_nationalities, pot, i, opponent_pot))
                 if graph[9*pot+i, 9*opponent_pot+home] != 1: # match pas déjà tiré
                     graph[9*pot+i, 9*opponent_pot+home] = 1 # home match
@@ -212,7 +246,8 @@ def tirage_au_sort(graph, count_nationalities):
                     count_nationalities[pot][i][nat_away] += 1
                     count_nationalities[opponent_pot][away][nat] += 1 
                     updates_nationality(graph, count_nationalities, pot, i, nat_away)
-                    updates_nationality(graph, count_nationalities, opponent_pot, away, nat)          
+                    updates_nationality(graph, count_nationalities, opponent_pot, away, nat)  
+                print((teams[opponent_pot][home]["club"], teams[opponent_pot][away]["club"]))        
                 opponents.append((teams[opponent_pot][home]["club"], teams[opponent_pot][away]["club"]))
             print(opponents)
             matches_list.append(opponents)
