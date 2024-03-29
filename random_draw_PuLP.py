@@ -1,5 +1,6 @@
 import random
 import pulp
+import csv
 
 teams = [[{"club": "ManCity", "nationality": "England"},
           {"club": "Bayern", "nationality": "Germany"},
@@ -112,11 +113,9 @@ def find_admissible_matches(selected_team, opponent_group, constraints):
     return admissible_matches
 
 def update_constraints(home, away, constraints, add=True):
-    operation = (lambda x, y: x.add(y)) if add else (lambda x, y: x.discard(y))
-    
     # Mettre à jour les contraintes de rencontre pour le match entre home et away
-    operation(constraints[home["club"]]["played-home"], away["club"])
-    operation(constraints[away["club"]]["played-ext"], home["club"])
+    constraints[home["club"]]["played-home"].add(away["club"])
+    constraints[away["club"]]["played-ext"].add(home["club"])
     
     # Mettre à jour les contraintes de nationalité pour le match entre home et away
     if add:
@@ -136,7 +135,8 @@ def write_to_csv(matches):
 
 def solve_problem(selected_team, constraints, new_match, nationalities):
         # Création du problème
-        prob = pulp.LpProblem("Match_Schedule", pulp.LpMaximize)
+        name_prob = "Match_Schedule_" + str(random.random())
+        prob = pulp.LpProblem(name_prob, pulp.LpMaximize)
 
         # Création du tableau pour stocker les variables de décision match_vars[i][j]=1 si i recoit j
         match_vars = [[pulp.LpVariable(f"Match_{i}_{j}", cat=pulp.LpBinary) for j in range(36)] for i in range(36)]
@@ -156,7 +156,7 @@ def solve_problem(selected_team, constraints, new_match, nationalities):
                 if i != j:
                     prob += pulp.lpSum(match_vars[i][j] + match_vars[j][i]) <= 1
 
-        # Contraintes spécifiques pour chaque pot
+        # Contraintes spécifiques pour chaque pot 1 match dom 1 match ext dans chaque pot
         for i in range(36):
             for pot_start in range(0, 36, 9):
                 prob += pulp.lpSum(match_vars[i][j] for j in range(pot_start, pot_start + 9)) == 1
@@ -198,7 +198,7 @@ def solve_problem(selected_team, constraints, new_match, nationalities):
         # Résolution du problème
         prob.solve(pulp.PULP_CBC_CMD(msg=False))
 
-        if pulp.LpStatus[prob.status] == 'Optimal':
+        if pulp.LpStatus[prob.status] == 'Optimal' :
             return True  
         else:
             return False  
@@ -215,10 +215,6 @@ def true_admissible_matches(teams, nationalities, selected_team, opponent_group,
     for match in admissible_matches:
         if solve_problem(selected_team, constraints, match, nationalities):
             true_matches.append(match)
-
-    if not true_matches:
-        print(f"equipe sélectionné: {selected_team} ")
-        print(constraints)
     return true_matches
 
 
@@ -233,12 +229,12 @@ def tirage_au_sort(teams, constraints):
         for i in indices:
             selected_team = teams[pot][i]
             li_opponents=[teams[pot][i]["club"]]
+
             for idx_opponent_pot in range(4):
                 matches_possible = true_admissible_matches(teams, nationalities, selected_team, teams[idx_opponent_pot], constraints)
                 if not matches_possible:
                     continue
                 (home, away) = random.choice(matches_possible)
-
                 update_constraints(selected_team, home, constraints, add=True)
                 update_constraints(away, selected_team, constraints, add=True)
                 li_opponents.append((home["club"], away["club"]))

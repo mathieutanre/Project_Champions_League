@@ -37,69 +37,89 @@ teams = [[{"club": "ManCity", "nationality": "England"},
            {"club": "Antwerp", "nationality": "Belgium"},
            {"club": "Lens", "nationality": "France"}]]
 
-import random
-
 def initialize_constraints(teams):
+    """
+    Initialise et retourne les contraintes pour chaque club.
+    """
     constraints = {}
     for pot in teams:
         for team in pot:
             constraints[team["club"]] = {
                 "played": set(),
-                "nationalities": {team["nationality"]: float('inf')}  # Assure qu'une équipe ne joue pas contre sa propre nationalité
+                "nationalities": {}
             }
     return constraints
 
 def is_match_admissible(selected_team, home, away, constraints):
-    if home["club"] == away["club"]:
+    """
+    Vérifie si un match entre l'équipe à domicile et à l'extérieur est admissible.
+    """
+    if home["club"] in constraints[selected_team["club"]]["played"] or \
+       home["nationality"] == selected_team["nationality"] or \
+       constraints[home["club"]]["nationalities"].get(selected_team["nationality"], 0) >= 2:
         return False
-    if home["club"] in constraints[selected_team["club"]]["played"] or away["club"] in constraints[selected_team["club"]]["played"]:
+    if away["club"] in constraints[selected_team["club"]]["played"] or \
+       away["nationality"] == selected_team["nationality"] or \
+       constraints[away["club"]]["nationalities"].get(selected_team["nationality"], 0) >= 2:
         return False
-    if home["nationality"] == away["nationality"]:
-        return False
-    if constraints[home["club"]]["nationalities"].get(away["nationality"], 0) >= 2 or constraints[away["club"]]["nationalities"].get(home["nationality"], 0) >= 2:
-        return False
+
     return True
 
-def update_constraints(home, away, constraints, add=True):
-    operation = (lambda x, y: x.add(y)) if add else (lambda x, y: x.discard(y))
-    operation(constraints[home["club"]]["played"], away["club"])
-    operation(constraints[away["club"]]["played"], home["club"])
-    if add:
-        constraints[home["club"]]["nationalities"][away["nationality"]] = constraints[home["club"]]["nationalities"].get(away["nationality"], 0) + 1
-        constraints[away["club"]]["nationalities"][home["nationality"]] = constraints[away["club"]]["nationalities"].get(home["nationality"], 0) + 1
-    else:
-        constraints[home["club"]]["nationalities"][away["nationality"]] -= 1
-        constraints[away["club"]]["nationalities"][home["nationality"]] -= 1
+def update_constraints(selected_team, home, away, constraints, undo=False):
+    """
+    Met à jour ou annule la mise à jour des contraintes pour un match donné.
+    """
+    operation = -1 if undo else 1
+    constraints[home["club"]]["played"].add(selected_team["club"]) if not undo else constraints[home["club"]]["played"].discard(selected_team["club"])
+    constraints[selected_team["club"]]["played"].add(home["club"]) if not undo else constraints[selected_team["club"]]["played"].discard(home["club"])
+    constraints[home["club"]]["nationalities"][selected_team["nationality"]] = constraints[home["club"]]["nationalities"].get(selected_team["nationality"], 0) + operation
+    constraints[selected_team["club"]]["nationalities"][home["nationality"]] = constraints[selected_team["club"]]["nationalities"].get(home["nationality"], 0) + operation
 
-def backtrack_admissible_matches(opponent_group, constraints, matches=[], index=0):
-    if index == len(opponent_group):
-        return matches if len(matches) == len(opponent_group) * (len(opponent_group) - 1) / 2 else None
-    
-    for i, home in enumerate(opponent_group):
-        for j, away in enumerate(opponent_group):
-            if i != j and is_match_admissible(home, home, away, constraints):
-                update_constraints(home, away, constraints)
-                matches.append((home, away))
-                
-                result = backtrack_admissible_matches(opponent_group, constraints, matches, index + 1)
-                if result:
-                    return result
-                
-                matches.pop()
-                update_constraints(home, away, constraints, add=False)
-    
-    return None
+    constraints[away["club"]]["played"].add(selected_team["club"]) if not undo else constraints[away["club"]]["played"].discard(selected_team["club"])
+    constraints[selected_team["club"]]["played"].add(home["club"]) if not undo else constraints[selected_team["club"]]["played"].discard(away["club"])
+    constraints[away["club"]]["nationalities"][selected_team["nationality"]] = constraints[away["club"]]["nationalities"].get(selected_team["nationality"], 0) + operation
+    constraints[selected_team["club"]]["nationalities"][away["nationality"]] = constraints[selected_team["club"]]["nationalities"].get(away["nationality"], 0) + operation
+
+def find_admissible_matches(selected_team, opponent_group, constraints):
+    """
+    Trouve et retourne tous les matchs admissibles pour une équipe sélectionnée.
+    """
+    admissible_matches = []
+    for opponent1 in opponent_group:
+        for opponent2 in opponent_group:
+            if is_match_admissible(selected_team, opponent1, opponent2, constraints):
+                admissible_matches.append((opponent1, opponent2))
+            if is_match_admissible(selected_team, opponent2, opponent1, constraints):
+                admissible_matches.append((opponent2, opponent1))
+    return admissible_matches
 
 
+def tirage_au_sort(selected_team, teams, opponent_group, constraints):
+    """
+    Sélectionne une combinaison admissible de matchs pour l'équipe sélectionnée dans tous les groupes.
+    """
+    all_matches = []
+    for group in teams:
+        if selected_team in group:
+            continue  # Sauter le groupe de l'équipe sélectionnée
+        admissible_matches = find_admissible_matches(selected_team, group, constraints)
+        if not admissible_matches:
+            return None  # Aucun match admissible trouvé, impossible de continuer
+        # Sélectionne un match admissible au hasard
+        match = random.choice(admissible_matches)
+        all_matches.append(match)
+        update_constraints(selected_team, *match, constraints)
+    return all_matches
 
+# Exemple d'utilisation
 constraints = initialize_constraints(teams)
-selected_team = teams[0][0]
-opponent_group = teams[1]
-result = backtrack_admissible_matches(opponent_group, constraints)
+selected_team = teams[0][0]  # Exemple : sélectionner la première équipe du premier groupe
 
-if result:
-    print(f"Admissible matches for teams in the opponent group:")
-    for home, away in result:
+# Trouver des matchs admissibles pour l'équipe sélectionnée
+admissible_matches = select_admissible_matches(selected_team, teams, constraints)
+if admissible_matches:
+    print(f"Admissible matches for {selected_team['club']}:")
+    for home, away in admissible_matches:
         print(f"{home['club']} (Home) vs {away['club']} (Away)")
 else:
-    print("No admissible matches configuration found without leading to a deadlock.")
+    print(f"No admissible matches found for {selected_team['club']}.")
