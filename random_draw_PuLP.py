@@ -206,15 +206,11 @@ def solve_problem(selected_team, constraints, new_match, nationalities):
 
 def true_admissible_matches(teams, nationalities, selected_team, opponent_group, constraints):
     true_matches=list()
-    admissible_matches = find_admissible_matches(selected_team, opponent_group, constraints)
-    if not admissible_matches:
-        print("La liste de match admissible avant vérification est vide")
-        return None  # Aucun match admissible trouvé
-    
-    
-    for match in admissible_matches:
-        if solve_problem(selected_team, constraints, match, nationalities):
-            true_matches.append(match)
+    for home in opponent_group:
+        for away in opponent_group:
+            match = (home, away)
+            if solve_problem(selected_team, constraints, match, nationalities):
+                true_matches.append(match)
     return true_matches
 
 

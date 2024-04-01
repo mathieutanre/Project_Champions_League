@@ -141,56 +141,50 @@ function update_constraints(home, away, constraints, add=true)
     end
 end
 
-function write_to_csv(matches)
-    df = DataFrame(matches, [:Home, :Away])
-    CSV.write("tirage_au_sort_1.csv", df)
-end
-
-
-
 function solve_problem(selected_team, constraints, new_match, nationalities, teams)
     model = Model(Gurobi.Optimizer)
     set_optimizer_attribute(model, "OutputFlag", 0)
-
-    @variable(model, match_vars[1:36, 1:36], Bin)
+    T=8
+    @variable(model, match_vars[1:36, 1:36, 1:8], Bin)
 
     # Objective function is trivial since we're not maximizing or minimizing a specific goal
     @objective(model, Max, 0)
 
     # General constraints
     for i in 1:36
-        @constraint(model, match_vars[i, i] == 0)  # A team cannot play against itself
+        @constraint(model, sum(match_vars[i, i, t] for t in 1:8) == 0)  # A team cannot play against itself
         for j in 1:36
             if i != j
-                @constraint(model, match_vars[i, j] + match_vars[j, i] <= 1)  # Each pair of teams plays at most once
+                @constraint(model, sum(match_vars[i, j, t] + match_vars[j, i, t] for t in 1:8) <= 1)  # Each pair of teams plays at most once
             end
         end
     end
 
-    # One home and one away match in each group of 9 teams
+
+    # Contraintes spécifiques pour chaque pot
     for i in 1:36
-        for pot_start in 1:9:36
-            @constraint(model, sum(match_vars[i, j] for j in pot_start:(pot_start+8)) == 1)
-            @constraint(model, sum(match_vars[j, i] for j in pot_start:(pot_start+8)) == 1)
+        for pot_start in 1:9:28
+            @constraint(model, sum(match_vars[i, j, t] for t in 1:T, j in pot_start:pot_start+8) == 1)
+            @constraint(model, sum(match_vars[j, i, t] for t in 1:T, j in pot_start:pot_start+8) == 1)
         end
     end
 
     # Constraint for the initially selected admissible match
     home_idx, away_idx = get_index_of_team(new_match[1]["club"], teams), get_index_of_team(new_match[2]["club"], teams)
     selected_idx = get_index_of_team(selected_team["club"], teams)
-    @constraint(model, match_vars[selected_idx, home_idx] == 1)
-    @constraint(model, match_vars[away_idx, selected_idx] == 1)
+    @constraint(model, sum(match_vars[selected_idx, home_idx, t] for t in 1:T) == 1)
+    @constraint(model, sum(match_vars[away_idx, selected_idx, t] for t in 1:T) == 1)
 
     # Applying constraints based on previously played matches and nationality constraints
     for (club, cons) in constraints
         club_idx = get_index_of_team(club, teams)
         for home_club in cons["played-home"]
             home_idx = get_index_of_team(home_club, teams)
-            @constraint(model, match_vars[club_idx, home_idx] == 1)
+            @constraint(model, sum(match_vars[club_idx, home_idx, t] for t in 1:T) == 1)
         end
         for away_club in cons["played-ext"]
             away_idx = get_index_of_team(away_club, teams)
-            @constraint(model, match_vars[away_idx, club_idx] == 1)
+            @constraint(model, sum(match_vars[away_idx, club_idx, t] for t in 1:T) == 1)
         end
     end
 
@@ -201,7 +195,7 @@ function solve_problem(selected_team, constraints, new_match, nationalities, tea
             for (k, pot_k) in enumerate(teams)
                 for (l, team_l) in enumerate(pot_k)
                     if team_j["nationality"] == team_l["nationality"] && team_idx != ((k - 1) * 9 + l)
-                        @constraint(model, match_vars[team_idx, (k - 1) * 9 + l] == 0)
+                        @constraint(model, sum(match_vars[team_idx, (k - 1) * 9 + l, t] for t in 1:T) == 0)
                     end
                 end
             end
@@ -216,19 +210,14 @@ end
 
 function true_admissible_matches(teams, nationalities, selected_team, opponent_group, constraints)
     true_matches = []
-    admissible_matches = find_admissible_matches(selected_team, opponent_group, constraints)
-    
-    if isempty(admissible_matches)
-        println("La liste de match admissible avant vérification est vide")
-        return nothing  # Aucun match admissible trouvé
-    end
-    
-    for match in admissible_matches
-        if solve_problem(selected_team, constraints, match, nationalities, teams)
-            push!(true_matches, match)
+    for home in opponent_group
+        for away in opponent_group
+            match = (home, away)
+            if solve_problem(selected_team, constraints, match, nationalities, teams)
+                push!(true_matches, match)
+            end
         end
     end
-    
     return true_matches
 end
 
@@ -244,31 +233,26 @@ function tirage_au_sort(teams, constraints)
             
             for idx_opponent_pot in 1:4
                 matches_possible = true_admissible_matches(teams, nationalities, selected_team, teams[idx_opponent_pot], constraints)
-                if matches_possible == nothing
-                    continue
-                end
-                # Supposons que `collection` est la collection que vous souhaitez utiliser avec `rand`
-                collection = 1:length(matches_possible)
-                if isempty(collection)
-                    println("La collection est vide. Aucun tirage possible.")
-                    # Gérer le cas d'une collection vide, par exemple en retournant une valeur par défaut
-                    return "Il faut debugger"
-                else
-                    # La collection n'est pas vide, on peut faire le tirage au sort
-                    idx = rand(collection)
-                    (home, away) = matches_possible[rand(1:length(matches_possible))]
-                    update_constraints(selected_team, home, constraints, true)
-                    update_constraints(away, selected_team, constraints, true)
-                    push!(li_opponents, (home["club"], away["club"]))
-                end
-                println(li_opponents)
-                push!(matches_list, li_opponents)
+                (home, away) = matches_possible[rand(1:length(matches_possible))]
+                update_constraints(selected_team, home, constraints, true)
+                update_constraints(away, selected_team, constraints, true)
+                push!(li_opponents, (home["club"], away["club"]))
             end
+            println(li_opponents)
+            push!(matches_list, li_opponents)
         end
     end
-    write_to_csv(matches_list)
-    println("CSV file 'tirage_au_sort_1.csv' has been generated successfully.")
+        
+    # Affichage des résultats
+    println("Résultats du tirage au sort :")
+    for match in matches_list
+        for (home, away) in match
+            println("$(home) , $(away)")
+        end
+        println("\n---\n")
+    end
 end
+
 
 
 constraints = initialize_constraints(teams)

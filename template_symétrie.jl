@@ -13,7 +13,8 @@ T = 8
 # Variables supplémentaires pour contrôler les breaks
 @variable(model, break_var[1:N, 2:6], Bin)
 
-#=
+
+
 # Contrainte : une équipe ne peut pas jouer contre elle-même
 @constraint(model, no_self_play[i in 1:N, t in 1:T], x[i, i, t] == 0)
 
@@ -28,7 +29,7 @@ for i in 1:N
         @constraint(model, sum(x[j, i, t] for t in 1:T, j in pot_start:pot_start+8) == 1)
     end
 end
-=#
+
 
 
 #Fixer les variables nulles
