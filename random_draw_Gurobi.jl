@@ -145,6 +145,7 @@ function solve_problem(selected_team, constraints, new_match, nationalities, tea
     model = Model(Gurobi.Optimizer)
     set_optimizer_attribute(model, "OutputFlag", 0)
     T=8
+
     @variable(model, match_vars[1:36, 1:36, 1:8], Bin)
 
     # Objective function is trivial since we're not maximizing or minimizing a specific goal
@@ -199,6 +200,12 @@ function solve_problem(selected_team, constraints, new_match, nationalities, tea
                     end
                 end
             end
+        end
+    end
+
+    for nationality in nationalities
+        for i in 1:36
+            @constraint(model, sum(match_vars[i, j, t] + match_vars[j, i, t] for t in 1:8 for j in 1:36 if teams[div(j-1, 9) + 1][(j-1) % 9 + 1]["nationality"] == nationality) <= 2)
         end
     end
 
