@@ -239,10 +239,30 @@ function tirage_au_sort(teams, constraints)
             li_opponents = [(selected_team["club"], string())]
             
             for idx_opponent_pot in 1:4
-                matches_possibles = list()
+                equipes_possibles = []
                 matches_possible = true_admissible_matches(teams, nationalities, selected_team, teams[idx_opponent_pot], constraints)
-                println(matches_possible)
+                for match in matches_possible
+                    push!(equipes_possibles, (match[1]["club"], match[2]["club"]))
+                end
+                println(selected_team["club"])
+                println("")
+                println(idx_opponent_pot)
+                println("")
+                println(equipes_possibles)
+                println("")
                 (home, away) = matches_possible[rand(1:length(matches_possible))]
+                println("Matchs sélectionnés dans le pot")
+                println(idx_opponent_pot)
+                println((home["club"], away["club"]))
+                println("Appuyez sur la barre d'espace suivi d'Entrée pour continuer...")
+                while true
+                    input = readline()
+                    if input == " "
+                        break
+                    else
+                        println("Vous n'avez pas appuyé sur la barre d'espace suivi d'Entrée, réessayez.")
+                    end
+                end
                 update_constraints(selected_team, home, constraints, true)
                 update_constraints(away, selected_team, constraints, true)
                 push!(li_opponents, (home["club"], away["club"]))
